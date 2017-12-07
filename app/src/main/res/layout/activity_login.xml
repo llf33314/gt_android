@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/login_icons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/dp_30"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/dp_140"
+            android:layout_height="@dimen/dp_45"
+            android:src="@drawable/launch_duofriend" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_3"
+            android:text="用多粉，好生意"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/login_login_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_25"
+        android:layout_marginRight="@dimen/dp_25"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/dp_100"
+        android:alpha="0"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_30"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/dp_22"
+                android:layout_height="@dimen/dp_22"
+                android:src="@drawable/login_account"
+
+                />
+
+            <EditText
+                android:id="@+id/login_account"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:background="@null"
+                android:gravity="bottom"
+                android:hint="请输入多粉账号"
+                android:inputType="textVisiblePassword"
+                android:maxLines="1"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <View
+            style="@style/gray_line"
+            android:layout_marginTop="@dimen/dp_10" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginTop="@dimen/dp_20"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/dp_22"
+                android:layout_height="@dimen/dp_22"
+                android:src="@drawable/login_psd"
+
+                />
+
+            <EditText
+                android:id="@+id/login_psd"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@null"
+                android:gravity="bottom"
+                android:hint="请输入密码"
+                android:maxLines="1"
+                android:textSize="16sp"
+                android:inputType="textPassword"
+                />
+
+            <com.gt.gtapp.widget.ImageCheckBox
+                android:id="@+id/login_psd_switch"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_25"
+                android:paddingBottom="@dimen/dp_5"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_5"
+                app:un_checked_src="@drawable/login_hide"
+                app:checked_src="@drawable/login_show"
+                />
+        </LinearLayout>
+
+        <View
+            style="@style/gray_line"
+            android:layout_marginTop="@dimen/dp_10" />
+        <TextView
+            android:id="@+id/login_login"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_45"
+            android:text="登\t录"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/dp_30"
+            android:enabled="false"
+            android:background="@drawable/btn_login"
+            android:gravity="center"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/login_bottom_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:text="广东谷通科技 版权所有"
+        android:textColor="@color/launch_gray" />
+
+</FrameLayout>

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#ffffff</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="black">#000000</color>
+    <color name="launch_gray">#838383</color>
+    <color name="white">#ffffff</color>
+    <color name="gray">#dddddd</color>
+    <color name="login_un_enable">#fed0d0</color>
+    <color name="login_enable">#ff4257</color>
+    <color name="login_enable_p">#fa223a</color>
 </resources>

@@ -1,0 +1,17 @@
+<html>
+<body>
+<button id="test" onclick="fromAndroid()">
+    test
+</button>
+</body>
+</html>
+<script>
+    //androidTest是我们安卓定义  如果在非我们安卓APP上加载当前网页 返回undefined 其他调用跟js一致
+    //若用vue如何拿到androidTest对象 问少权  testFromJs看java代码
+
+    function fromAndroid(){
+        alert(androidTest.testFromJs('13169631765'));
+        }
+</script>
+
+
