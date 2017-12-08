@@ -1,7 +1,9 @@
 package com.gt.gtapp.http;
 
+import com.gt.gtapp.bean.BossAccountBean;
 import com.gt.gtapp.bean.LoginAccountBean;
 import com.gt.gtapp.bean.SignBean;
+import com.gt.gtapp.bean.StaffAccountBean;
 import com.gt.gtapp.bean.StaffListIndustryBean;
 import com.gt.gtapp.http.retrofit.BaseResponse;
 
@@ -30,6 +32,13 @@ public  interface ApiService {
 
     @POST("app/manage/bus/listIndustry")
     Observable<BaseResponse<List<StaffListIndustryBean>>> staffListIndustry();
+
+    @POST("app/manage/bus/getAccountInfo")
+    Observable<BaseResponse<BossAccountBean>> bossAccountInfo();
+
+    @POST("app/manage/bus/getAccountInfo")
+    Observable<BaseResponse<StaffAccountBean>> staffAccountInfo();
+
 
 
 

@@ -5,7 +5,7 @@ package com.gt.gtapp.http;
 public class HttpResponseException extends RuntimeException {
 
     /**
-     * 主要用于多接口请求 退出链表
+     * 用于多接口请求 退出链表 自己提示
      */
     public static int SUCCESS_BREAK=555;
 

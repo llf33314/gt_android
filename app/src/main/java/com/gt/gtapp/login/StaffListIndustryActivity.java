@@ -11,7 +11,9 @@ import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
 import com.gt.gtapp.base.recyclerview.BaseRecyclerAdapter;
 import com.gt.gtapp.base.recyclerview.SpaceItemDecoration;
+import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.bean.StaffListIndustryBean;
+import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.main.MainActivity;
 import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
 import com.gt.gtapp.utils.commonutil.ConvertUtils;
@@ -49,6 +51,7 @@ public class StaffListIndustryActivity extends BaseActivity {
         adapter.setmOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onClick(View view, Object item, int position) {
+                    RxBus.get().post(new LoginFinishMsg());
                     Intent intent =new Intent(StaffListIndustryActivity.this, MainActivity.class);
                     intent.putExtra("url",((StaffListIndustryBean)item).getUrl());
                     startActivity(intent);

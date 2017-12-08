@@ -21,15 +21,20 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.gt.gtapp.R;
+import com.gt.gtapp.base.MyApplication;
+import com.gt.gtapp.bean.BossAccountBean;
 import com.gt.gtapp.bean.LoginAccountBean;
 import com.gt.gtapp.bean.LoginBean;
+import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.bean.SignBean;
 import com.gt.gtapp.bean.StaffListIndustryBean;
 import com.gt.gtapp.http.HttpResponseException;
 import com.gt.gtapp.http.retrofit.BaseResponse;
 import com.gt.gtapp.http.retrofit.HttpCall;
+import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.http.rxjava.observable.DialogTransformer;
 import com.gt.gtapp.http.rxjava.observable.ResultTransformer;
+import com.gt.gtapp.http.rxjava.observable.SchedulerTransformer;
 import com.gt.gtapp.http.rxjava.observer.BaseObserver;
 import com.gt.gtapp.main.MainActivity;
 import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
@@ -143,6 +148,15 @@ public class LoginActivity extends RxAppCompatActivity {
             }
         });
 
+        RxBus.get().toObservable(LoginFinishMsg.class)
+                .compose(SchedulerTransformer.<LoginFinishMsg>transformer())
+                .subscribe(new Consumer<LoginFinishMsg>() {
+            @Override
+            public void accept(@NonNull LoginFinishMsg loginFinishMsg) throws Exception {
+                finish();
+            }
+        });
+
     }
     private class LoginEditTextListener implements TextWatcher{
 
@@ -189,13 +203,13 @@ public class LoginActivity extends RxAppCompatActivity {
                                     jsonResult = s.substring(s.indexOf("(") + 1, s.indexOf(")"));
                                     loginBean = gson.fromJson(jsonResult, LoginBean.class);
                                 } catch (Exception e) { //后台数据有误json转化出错
-                                    throw  new HttpResponseException(500,"后台数据有误");
+                                    return Observable.error( new HttpResponseException(500,"后台数据有误"));
                                 }
 
                                 if ("0".equals(loginBean.getCode())) {//登录成功
                                     return HttpCall.getApiService().getLoginAccount();
                                 }else{
-                                    throw new HttpResponseException(1,"erp接口登录失败");
+                                    return Observable.error(new HttpResponseException(-1,"erp接口登录失败"));
                                 }
                             }
                         })
@@ -203,13 +217,15 @@ public class LoginActivity extends RxAppCompatActivity {
                         .flatMap(new Function<LoginAccountBean, ObservableSource<BaseResponse<List<StaffListIndustryBean>>>>() {
                             @Override
                             public ObservableSource<BaseResponse<List<StaffListIndustryBean>>> apply(@NonNull LoginAccountBean loginAccountBean) throws Exception {
+                                MyApplication.setAccountType(loginAccountBean.getAccountType());
                                 if (loginAccountBean.getAccountType()==1){//老板账号
                                     String duoFriendUrl=loginAccountBean.getHomeUrl();
+
                                     Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                                     intent.putExtra("url",duoFriendUrl);
                                     startActivity(intent);
-                                    finish();
-                                    throw  new HttpResponseException(HttpResponseException.SUCCESS_BREAK,"");
+
+                                    return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));
                                 }else{//员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
                                     return HttpCall.getApiService().staffListIndustry();
                                 }

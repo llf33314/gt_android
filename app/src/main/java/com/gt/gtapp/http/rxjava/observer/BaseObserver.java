@@ -50,13 +50,15 @@ public abstract class BaseObserver<T> implements Observer<T> {
             if (((HttpResponseException) e).getCode()!=HttpResponseException.SUCCESS_BREAK){
                 HttpResponseException responseException = (HttpResponseException) e;
                 onFailed(responseException);
+            }else if (!disposable.isDisposed()){
+                disposable.dispose();
             }
 
         }else {//(e instanceof RuntimeException)
             Logger.e("HTTP","程序异常"+e.getMessage());
             ToastUtil.getInstance().showToast("后台数据有误！");
         }
-        disposable.dispose();
+
     }
 
     /**

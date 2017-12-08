@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
+import com.gt.gtapp.bean.LoginFinishMsg;
+import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
 
 import java.util.ArrayList;
@@ -80,6 +82,7 @@ public class MainActivity extends BaseActivity {
         mFragmentTransaction.hide(personFragment);
         mFragmentTransaction.commit();
 
+        RxBus.get().post(new LoginFinishMsg());
     }
 
     @Override
@@ -106,6 +109,7 @@ public class MainActivity extends BaseActivity {
 
                     mFragmentTransaction.commit();
                     currentFragment = 0;
+                    changeStyle(TOOLBAR_RED_STYLE);
                 }
 
                 break;
@@ -123,6 +127,7 @@ public class MainActivity extends BaseActivity {
 
                     mFragmentTransaction.commit();
                     currentFragment = 1;
+                    changeStyle(TOOLBAR_RED_WHITE_TITLE_STYLE,"个人中心");
                 }
                 break;
 

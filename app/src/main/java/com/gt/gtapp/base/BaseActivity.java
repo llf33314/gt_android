@@ -33,9 +33,22 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     private ImageView toolSetting;
     private ImageView toolmessage;
 
+    /**
+     * 隐藏标题栏
+     */
     public final int TOOLBAR_NOT = 0;
+    /**
+     * 红色无标题
+     */
     public final int TOOLBAR_RED_STYLE = 1;
+    /**
+     * 白底返回键
+     */
     public final int TOOLBAR_BACK = 2;
+    /**
+     * 红色白标题
+     */
+    public final int TOOLBAR_RED_WHITE_TITLE_STYLE = 3;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +74,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
                 break;
             case TOOLBAR_BACK:
                 setBackStyle(this.getTitle().toString());
+                break;
+            case TOOLBAR_RED_WHITE_TITLE_STYLE:
+                setRedWhiteStyle(this.getTitle().toString());
                 break;
             default:
                 break;
@@ -148,6 +164,37 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         toolmessage.setVisibility(View.VISIBLE);
         toolBarTitle.setVisibility(View.GONE);
         toolBarBack.setVisibility(View.GONE);
+    }
+
+    private void setRedWhiteStyle(String title){
+        setRedStyle();
+        toolBarTitle.setTextColor(getResources().getColor(R.color.white));
+        toolBarTitle.setText(title);
+        toolBarTitle.setVisibility(View.VISIBLE);
+    }
+
+    public void changeStyle(int stypeType,String title){
+        changeStyle(stypeType);
+        toolBarTitle.setText(title);
+    }
+
+    public void changeStyle(int stypeType){
+        switch (stypeType) {
+            case TOOLBAR_NOT:
+                mToolbar.setVisibility(View.GONE);
+                break;
+            case TOOLBAR_RED_STYLE:
+                setRedStyle();
+                break;
+            case TOOLBAR_BACK:
+                setBackStyle(this.getTitle().toString());
+                break;
+            case TOOLBAR_RED_WHITE_TITLE_STYLE:
+                setRedWhiteStyle(this.getTitle().toString());
+                break;
+            default:
+                break;
+        }
     }
 
     public void goneToolBar() {

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.gt.gtapp.BuildConfig;
-import com.gt.gtapp.http.HttpConfig;
 import com.gt.gtapp.utils.Logger;
 import com.tencent.smtt.sdk.QbSdk;
 
@@ -17,6 +16,8 @@ import com.tencent.smtt.sdk.QbSdk;
 public class MyApplication extends Application {
 
     private static Activity currentActivity;
+
+    private static int accountType;
 
     private static Context appContext;
     @Override
@@ -96,6 +97,14 @@ public class MyApplication extends Application {
 
     public static Activity getCurrentActivity(){
         return currentActivity;
+    }
+
+    public static int getAccountType() {
+        return accountType;
+    }
+
+    public static void setAccountType(int accountType) {
+        MyApplication.accountType = accountType;
     }
 
     public static Context getAppContext(){
