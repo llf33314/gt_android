@@ -5,13 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-<android.support.v7.widget.Toolbar
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_60"
-    android:background="@drawable/shape_toolbar_shade"
-    >
 
-</android.support.v7.widget.Toolbar>
     <FrameLayout
         android:id="@+id/main_content"
         android:layout_width="match_parent"
@@ -79,6 +73,7 @@
                 android:textSize="12sp"
                 android:gravity="center"
                 android:layout_marginTop="@dimen/dp_2"
+                android:textColor="@color/launch_gray"
                 />
         </LinearLayout>
 

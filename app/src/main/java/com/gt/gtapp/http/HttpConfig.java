@@ -5,5 +5,13 @@ package com.gt.gtapp.http;
  */
 
 public class HttpConfig {
-    public static String BASE_RUL="";
+    public static String BASE_RUL="http://192.168.3.98:8401";
+
+    //陈丹erp登录接口
+    //测试
+     public static final String ERP_LOGIN_URL="https://deeptel.com.cn/ErpMenus/79B4DE7C/DoubleErplogin.do";
+    //堡垒
+    // public static final String ERP_LOGIN_URL="https://nb.deeptel.com.cn/ErpMenus/79B4DE7C/DoubleErplogin.do";
+    //正式
+    //public static final String ERP_LOGIN_URL="https://duofriend.com/ErpMenus/79B4DE7C/DoubleErplogin.do";
 }

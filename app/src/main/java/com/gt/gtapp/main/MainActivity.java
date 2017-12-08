@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.gt.gtapp.R;
+import com.gt.gtapp.base.BaseActivity;
 import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @BindView(R.id.main_bottom_duofriend)
     LinearLayout mainBottomDuofriend;
@@ -51,21 +52,23 @@ public class MainActivity extends AppCompatActivity {
      */
     private int currentFragment = 0;
 
+    private String url;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        StatusBarFontHelper.setStatusBarTransparent(this);
-
         init();
     }
 
     private void init() {
+        url=getIntent().getStringExtra("url");
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
-        duofriendFragment = new DuofriendFragment();
+        duofriendFragment = new DuofriendFragment(url);
         personFragment = new PersonFragment();
+
 
         fragments = new ArrayList<>();
 
@@ -79,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public int getToolBarType() {
+        return TOOLBAR_RED_STYLE;
+    }
+
 
     @OnClick({R.id.main_bottom_duofriend, R.id.main_bottom_person})
     public void onViewClicked(View view) {
@@ -90,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     mainBottomDuofriendTv.setVisibility(View.GONE);
 
                     mainBottomPersonIv.setImageResource(R.drawable.main_person);
-                    mainBottomPersonTv.setVisibility(View.VISIBLE);
+                    mainBottomPersonTv.setTextColor(getResources().getColor(R.color.launch_gray));
 
                     mFragmentTransaction = mFragmentManager.beginTransaction();
                     mFragmentTransaction.show(duofriendFragment);
@@ -103,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.main_bottom_person:
                 if (currentFragment != 1) {
-                    mainBottomPersonIv.setImageResource(R.drawable.main_duofriend_icon_p);
-                    mainBottomPersonTv.setVisibility(View.GONE);
+                    mainBottomPersonIv.setImageResource(R.drawable.main_person_p);
+                    mainBottomPersonTv.setTextColor(getResources().getColor(R.color.login_enable));
 
                     mainBottomDuofriendIv.setImageResource(R.drawable.main_duofriend_icon);
                     mainBottomDuofriendTv.setVisibility(View.VISIBLE);
@@ -116,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
                     mFragmentTransaction.commit();
                     currentFragment = 1;
                 }
+                break;
+
+            default:
                 break;
         }
     }

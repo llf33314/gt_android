@@ -39,6 +39,12 @@ public class DuofriendFragment extends Fragment {
     WebView webView;
     Unbinder unbinder;
 
+    String url;
+
+    public DuofriendFragment(String url) {
+        this.url=url;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -49,7 +55,8 @@ public class DuofriendFragment extends Fragment {
     }
 
     private void initWebview(){
-        webView.loadUrl("https://webapp.deeptel.com.cn/manage/#/index");
+        //webView.loadUrl("https://webapp.deeptel.com.cn/manage/#/index");
+        webView.loadUrl(url);
         //webView.loadUrl("https://baidu.com");
         webView.addJavascriptInterface(new GtBrideg(), "androidTest");//添加js监听 这样html就能调用客户端
 
@@ -160,6 +167,9 @@ public class DuofriendFragment extends Fragment {
             } else{
                 return false;
             }
+    }
+    public void reLoad(){
+        webView.reload();
     }
 
     @Override

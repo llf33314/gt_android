@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/base_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/toolbar_height"
+    android:background="@drawable/shape_toolbar_shade">
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:lines="1"
+        android:text="@string/app_name"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/toolbar_back"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="match_parent"
+        android:background="@drawable/btn_gray_null"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10"
+        android:src="@drawable/back"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/toolbar_setting"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:background="@drawable/btn_gray_null"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10"
+        android:src="@drawable/main_top_setting" />
+
+    <ImageView
+        android:id="@+id/toolbar_message"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dp_10"
+        android:background="@drawable/btn_gray_null"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+
+        android:paddingTop="@dimen/dp_10"
+        android:src="@drawable/main_top_message"
+
+        />
+
+</RelativeLayout>

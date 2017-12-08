@@ -1,13 +1,13 @@
 package com.gt.gtapp.base;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
+import android.os.Bundle;
 
-import com.gt.gtapp.http.ApiService;
+import com.gt.gtapp.BuildConfig;
 import com.gt.gtapp.http.HttpConfig;
 import com.gt.gtapp.utils.Logger;
-import com.gt.gthttp.HttpInit;
 import com.tencent.smtt.sdk.QbSdk;
 
 /**
@@ -15,14 +15,64 @@ import com.tencent.smtt.sdk.QbSdk;
  */
 
 public class MyApplication extends Application {
+
+    private static Activity currentActivity;
+
     private static Context appContext;
     @Override
     public void onCreate() {
         super.onCreate();
         appContext=this;
-        HttpInit.init(this, HttpConfig.BASE_RUL, new ApiService());
+        initLogger();
         preInitX5WebCore();
+
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                currentActivity=activity;
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+
+            }
+        });
+
     }
+
+    private void initLogger(){
+        if (BuildConfig.DEBUG){
+            Logger.LOG_LEVEL=Logger.VERBOS;
+        }else{
+            Logger.LOG_LEVEL=Logger.ERROR;
+        }
+    }
+
 
     private void preInitX5WebCore() {
 
@@ -42,6 +92,10 @@ public class MyApplication extends Application {
         };
         QbSdk.initX5Environment(getApplicationContext(),  cb);
 
+    }
+
+    public static Activity getCurrentActivity(){
+        return currentActivity;
     }
 
     public static Context getAppContext(){

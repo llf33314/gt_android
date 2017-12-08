@@ -65,6 +65,7 @@
                 android:hint="请输入多粉账号"
                 android:inputType="textVisiblePassword"
                 android:maxLines="1"
+                android:text="goodtom"
                 android:textSize="16sp" />
         </LinearLayout>
 
@@ -96,6 +97,7 @@
                 android:gravity="bottom"
                 android:hint="请输入密码"
                 android:maxLines="1"
+                android:text="gt123456"
                 android:textSize="16sp"
                 android:inputType="textPassword"
                 />

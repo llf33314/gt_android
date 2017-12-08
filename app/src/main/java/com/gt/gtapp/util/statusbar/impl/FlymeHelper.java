@@ -44,7 +44,7 @@ public class FlymeHelper implements IStatusBarFontHelper {
                 window.setAttributes(lp);
                 result = true;
             } catch (Exception e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             }
         }
         return result;
