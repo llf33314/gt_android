@@ -5,7 +5,10 @@ package com.gt.gtapp.http;
  */
 
 public class HttpConfig {
-    public static String BASE_RUL="http://192.168.3.98:8401";
+    // 本地
+//    public static String BASE_RUL="http://192.168.3.98:8401";
+    // 测试
+    public static String BASE_RUL="https://webapp.deeptel.com.cn";
 
     //陈丹erp登录接口
     //测试
