@@ -9,9 +9,12 @@ import com.gt.gtapp.http.store.PersistentCookieStore;
 import com.gt.gtapp.utils.Logger;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -30,7 +33,7 @@ public class HttpCall {
                 loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
             }
 
-            PersistentCookieStore persistentCookieStore = new PersistentCookieStore(MyApplication.getAppContext());
+            PersistentCookieStore persistentCookieStore = PersistentCookieStore.getInstance();
             CookieJarImpl cookieJarImpl = new CookieJarImpl(persistentCookieStore, MyApplication.getAppContext());
 
             OkHttpClient okHttpClient = new OkHttpClient.Builder()

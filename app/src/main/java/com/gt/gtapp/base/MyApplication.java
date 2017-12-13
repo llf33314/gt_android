@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import com.gt.gtapp.BuildConfig;
 import com.gt.gtapp.utils.Logger;
+import com.orhanobut.hawk.Hawk;
 import com.tencent.smtt.sdk.QbSdk;
 
 /**
@@ -25,7 +26,7 @@ public class MyApplication extends Application {
         super.onCreate();
         appContext=this;
         initLogger();
-        preInitX5WebCore();
+        Hawk.init(this).build();
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
@@ -64,7 +65,26 @@ public class MyApplication extends Application {
             }
         });
 
+        //x5内核初始化接口
+        QbSdk.initX5Environment(getApplicationContext(),cb);
     }
+
+
+    QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
+
+        @Override
+        public void onViewInitFinished(boolean arg0) {
+            // TODO Auto-generated method stub
+            //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
+            Logger.d("onViewInitFinished", " onViewInitFinished is " + arg0);
+        }
+
+        @Override
+        public void onCoreInitFinished() {
+            // TODO Auto-generated method stub
+        }
+    };
+
 
     private void initLogger(){
         if (BuildConfig.DEBUG){
@@ -75,25 +95,7 @@ public class MyApplication extends Application {
     }
 
 
-    private void preInitX5WebCore() {
 
-        QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
-
-            @Override
-            public void onViewInitFinished(boolean arg0) {
-                // TODO Auto-generated method stub
-                //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
-                Logger.d("app", " onViewInitFinished is " + arg0);
-            }
-
-            @Override
-            public void onCoreInitFinished() {
-                // TODO Auto-generated method stub
-            }
-        };
-        QbSdk.initX5Environment(getApplicationContext(),  cb);
-
-    }
 
     public static Activity getCurrentActivity(){
         return currentActivity;

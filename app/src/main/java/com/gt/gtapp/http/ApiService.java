@@ -39,8 +39,7 @@ public  interface ApiService {
     @POST("app/manage/bus/getAccountInfo")
     Observable<BaseResponse<StaffAccountBean>> staffAccountInfo();
 
-
-
-
+    @POST(HttpConfig.ERP_LOGIN_OUT_URL)
+    Observable<String> erpLoginOut();
 
 }

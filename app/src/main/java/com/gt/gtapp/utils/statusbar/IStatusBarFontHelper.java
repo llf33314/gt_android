@@ -1,4 +1,4 @@
-package com.gt.gtapp.util.statusbar;
+package com.gt.gtapp.utils.statusbar;
 
 import android.app.Activity;
 

@@ -1,10 +1,10 @@
-package com.gt.gtapp.util.statusbar.impl;
+package com.gt.gtapp.utils.statusbar.impl;
 
 import android.app.Activity;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.gt.gtapp.util.statusbar.IStatusBarFontHelper;
+import com.gt.gtapp.utils.statusbar.IStatusBarFontHelper;
 
 import java.lang.reflect.Field;
 

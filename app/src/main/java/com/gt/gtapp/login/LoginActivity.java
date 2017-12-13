@@ -22,9 +22,8 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.gt.gtapp.R;
 import com.gt.gtapp.base.MyApplication;
-import com.gt.gtapp.bean.BossAccountBean;
 import com.gt.gtapp.bean.LoginAccountBean;
-import com.gt.gtapp.bean.LoginBean;
+import com.gt.gtapp.bean.HttpCodeMsgBean;
 import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.bean.SignBean;
 import com.gt.gtapp.bean.StaffListIndustryBean;
@@ -36,10 +35,12 @@ import com.gt.gtapp.http.rxjava.observable.DialogTransformer;
 import com.gt.gtapp.http.rxjava.observable.ResultTransformer;
 import com.gt.gtapp.http.rxjava.observable.SchedulerTransformer;
 import com.gt.gtapp.http.rxjava.observer.BaseObserver;
+import com.gt.gtapp.http.store.PersistentCookieStore;
 import com.gt.gtapp.main.MainActivity;
-import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
+import com.gt.gtapp.utils.statusbar.StatusBarFontHelper;
 import com.gt.gtapp.utils.commonutil.ConvertUtils;
 import com.gt.gtapp.widget.ImageCheckBox;
+import com.orhanobut.hawk.Hawk;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.util.ArrayList;
@@ -77,8 +78,6 @@ public class LoginActivity extends RxAppCompatActivity {
     @BindView(R.id.login_bottom_text)
     TextView loginBottomText;
 
-    Gson gson = new Gson();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,33 +103,73 @@ public class LoginActivity extends RxAppCompatActivity {
             }
         });
 
-        //1秒后执行动画
-        Observable.timer(1000, TimeUnit.MILLISECONDS)
+        //打开APP自动登录 如果等于1000代表是从桌面进去  等于1则是退出登录后进入
+        final int animStartTime=getIntent().getIntExtra("anim_start_time",1000);
+
+        //执行动画
+        Observable.timer(animStartTime, TimeUnit.MILLISECONDS)
                 .compose(this.<Long>bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
-                        ObjectAnimator animatorIconsUp = ObjectAnimator.ofFloat(loginIcons, "translationY",
-                                loginIcons.getTranslationY(),-ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_50)));
-                        animatorIconsUp.setDuration(500);
+                        // 从桌面进入 并且已经登录过就请求获取账号信息后 直接调到主页面
+                        if (animStartTime==1000&&LoginHelper.isLogined()){
+                            HttpCall.getApiService()
+                                    .getLoginAccount()
+                                    .flatMap(ResultTransformer.<LoginAccountBean>flatMap())
+                                    .flatMap(new Function<LoginAccountBean, ObservableSource<BaseResponse<List<StaffListIndustryBean>>>>() {
+                                        @Override
+                                        public ObservableSource<BaseResponse<List<StaffListIndustryBean>>> apply(@NonNull LoginAccountBean loginAccountBean) throws Exception {
+                                            MyApplication.setAccountType(loginAccountBean.getAccountType());
+                                            if (loginAccountBean.getAccountType()==1){//老板账号
+                                                String duoFriendUrl=loginAccountBean.getHomeUrl();
 
-                        ObjectAnimator animatorLoginUp = ObjectAnimator.ofFloat(loginLoginLl, "translationY",
-                                loginLoginLl.getTranslationY(),-ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_30)));
-                        ObjectAnimator animatorLoginAlpha = ObjectAnimator.ofFloat(loginLoginLl, "alpha", 0,1);
+                                                Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                                                intent.putExtra("url",duoFriendUrl);
+                                                startActivity(intent);
+                                                //这里不finish 其他地方会RxBus通知finish
+                                                return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));
+                                            }else{//员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
+                                                return HttpCall.getApiService().staffListIndustry();
+                                            }
+                                        }
+                                    })
+                                    .compose(ResultTransformer.<List<StaffListIndustryBean>>transformer())
+                                    .compose(LoginActivity.this.<List<StaffListIndustryBean>>bindToLifecycle())
+                                    //.compose(new DialogTransformer().<List<StaffListIndustryBean>>transformer())
+                                    .subscribe(new BaseObserver<List<StaffListIndustryBean>>() {
+                                        @Override
+                                        protected void onSuccess(List<StaffListIndustryBean> staffListIndustryBeanList) {
+                                            //获取上次点击选择记录的Hawk
+                                            //获取到员工账号的列表
+                                            String erpUrl=Hawk.get(StaffListIndustryActivity.STAFF_CHOOSE_URL);
+                                            if (!TextUtils.isEmpty(erpUrl)){
+                                                Intent intent =new Intent(LoginActivity.this, MainActivity.class);
+                                                intent.putExtra("url",erpUrl);
+                                                startActivity(intent);
+                                                finish();
+                                            }else{
+                                                Intent intent=new Intent(LoginActivity.this,StaffListIndustryActivity.class);
+                                                intent.putParcelableArrayListExtra("staffListIndustryList", (ArrayList<? extends Parcelable>) staffListIndustryBeanList);
+                                                startActivity(intent);
+                                                animShowLoginView();
+                                            }
+                                        }
 
-                        AnimatorSet loginAnimatorSet=new AnimatorSet();
-                        loginAnimatorSet.play(animatorLoginUp).with(animatorLoginAlpha);
-                        loginAnimatorSet.setDuration(500);
+                                        @Override
+                                        protected void onFailed(HttpResponseException responseException) {
+                                            super.onFailed(responseException);
+                                            if (responseException.getCode()==BaseResponse.TOKEN_PAST_TIME){
+                                                //animShowLoginView();
+                                                //session过期 请求刷新session并且登录其实就是再调用login按钮
 
-                        ObjectAnimator animatorBottomTextDown = ObjectAnimator.ofFloat(loginBottomText, "translationY",
-                                loginBottomText.getTranslationY(),ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_50)));
-                        animatorBottomTextDown.setDuration(500);
-
-                        animatorIconsUp.start();
-                        loginAnimatorSet.start();
-                        animatorBottomTextDown.start();
-
+                                            }
+                                        }
+                                    });
+                        }else{
+                            animShowLoginView();
+                        }
                     }
                 });
 
@@ -157,7 +196,38 @@ public class LoginActivity extends RxAppCompatActivity {
             }
         });
 
+        if (!TextUtils.isEmpty(loginAccount.getText())&&!TextUtils.isEmpty(loginPsd.getText())){
+            loginLogin.setEnabled(true);
+        }
+
     }
+
+    private void animShowLoginView(){
+
+        ObjectAnimator animatorIconsUp = ObjectAnimator.ofFloat(loginIcons, "translationY",
+                loginIcons.getTranslationY(),-ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_50)));
+        animatorIconsUp.setDuration(500);
+
+        ObjectAnimator animatorLoginUp = ObjectAnimator.ofFloat(loginLoginLl, "translationY",
+                loginLoginLl.getTranslationY(),-ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_30)));
+        ObjectAnimator animatorLoginAlpha = ObjectAnimator.ofFloat(loginLoginLl, "alpha", 0,1);
+
+        AnimatorSet loginAnimatorSet=new AnimatorSet();
+        loginAnimatorSet.play(animatorLoginUp).with(animatorLoginAlpha);
+        loginAnimatorSet.setDuration(500);
+
+        ObjectAnimator animatorBottomTextDown = ObjectAnimator.ofFloat(loginBottomText, "translationY",
+                loginBottomText.getTranslationY(),ConvertUtils.dp2px(LoginActivity.this.getResources().getDimension(R.dimen.dp_50)));
+        animatorBottomTextDown.setDuration(500);
+
+        animatorIconsUp.start();
+        loginAnimatorSet.start();
+        animatorBottomTextDown.start();
+    }
+
+
+
+
     private class LoginEditTextListener implements TextWatcher{
 
         @Override
@@ -184,49 +254,23 @@ public class LoginActivity extends RxAppCompatActivity {
                 final String account=loginAccount.getText().toString().trim();
                 final String psd=loginPsd.getText().toString().trim();
 
-                HttpCall.getApiService()
-                        .getSign(account,psd)
-                        .flatMap(ResultTransformer.<SignBean>flatMap())
-                        .flatMap(new Function<SignBean, ObservableSource<String>>() {
-                            @Override
-                            public ObservableSource<String> apply(@NonNull SignBean signBean) throws Exception {
-
-                                return HttpCall.getApiService().erpLogin(account, psd, gson.toJson(signBean));
-                            }
-                        })
-                        .flatMap(new Function<String, ObservableSource<BaseResponse<LoginAccountBean>>>() {
-                            @Override
-                            public ObservableSource<BaseResponse<LoginAccountBean>> apply(@NonNull String s) throws Exception {
-                                String jsonResult;
-                                LoginBean loginBean = null;
-                                try {
-                                    jsonResult = s.substring(s.indexOf("(") + 1, s.indexOf(")"));
-                                    loginBean = gson.fromJson(jsonResult, LoginBean.class);
-                                } catch (Exception e) { //后台数据有误json转化出错
-                                    return Observable.error( new HttpResponseException(500,"后台数据有误"));
-                                }
-
-                                if ("0".equals(loginBean.getCode())) {//登录成功
-                                    return HttpCall.getApiService().getLoginAccount();
-                                }else{
-                                    return Observable.error(new HttpResponseException(-1,"erp接口登录失败"));
-                                }
-                            }
-                        })
+                        LoginHelper.getNewSession(account,psd)
                         .flatMap(ResultTransformer.<LoginAccountBean>flatMap())
                         .flatMap(new Function<LoginAccountBean, ObservableSource<BaseResponse<List<StaffListIndustryBean>>>>() {
                             @Override
                             public ObservableSource<BaseResponse<List<StaffListIndustryBean>>> apply(@NonNull LoginAccountBean loginAccountBean) throws Exception {
                                 MyApplication.setAccountType(loginAccountBean.getAccountType());
-                                if (loginAccountBean.getAccountType()==1){//老板账号
+                                //老板账号
+                                if (loginAccountBean.getAccountType()==1){
                                     String duoFriendUrl=loginAccountBean.getHomeUrl();
-
+                                    LoginHelper.saveAccountPsdHawk(account,psd);
                                     Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                                     intent.putExtra("url",duoFriendUrl);
                                     startActivity(intent);
 
                                     return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));
-                                }else{//员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
+                                }else{
+                                    //员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
                                     return HttpCall.getApiService().staffListIndustry();
                                 }
                             }
@@ -238,9 +282,16 @@ public class LoginActivity extends RxAppCompatActivity {
                             @Override
                             protected void onSuccess(List<StaffListIndustryBean> staffListIndustryBeanList) {
                                 //获取到员工账号的列表
+                                LoginHelper.saveAccountPsdHawk(account,psd);
                                 Intent intent=new Intent(LoginActivity.this,StaffListIndustryActivity.class);
                                 intent.putParcelableArrayListExtra("staffListIndustryList", (ArrayList<? extends Parcelable>) staffListIndustryBeanList);
                                 startActivity(intent);
+                            }
+
+                            @Override
+                            protected void onFailed(HttpResponseException responseException) {
+                                super.onFailed(responseException);
+                                LoginHelper.clearAccountPsdHawk();
                             }
                         });
                 break;

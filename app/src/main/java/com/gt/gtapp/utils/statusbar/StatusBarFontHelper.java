@@ -1,4 +1,4 @@
-package com.gt.gtapp.util.statusbar;
+package com.gt.gtapp.utils.statusbar;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -6,9 +6,9 @@ import android.os.Build;
 import android.support.annotation.IntDef;
 import android.view.View;
 
-import com.gt.gtapp.util.statusbar.impl.AndroidMHelper;
-import com.gt.gtapp.util.statusbar.impl.FlymeHelper;
-import com.gt.gtapp.util.statusbar.impl.MIUIHelper;
+import com.gt.gtapp.utils.statusbar.impl.AndroidMHelper;
+import com.gt.gtapp.utils.statusbar.impl.FlymeHelper;
+import com.gt.gtapp.utils.statusbar.impl.MIUIHelper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -49,6 +49,7 @@ public class StatusBarFontHelper {
      * 适配4.4以上版本MIUIV、Flyme和6.0以上版本其他Android
      *
      * @return 1:MIUI 2:Flyme 3:android6.0
+     * @Params isFontColorDark 是否是黑色字体
      */
     public static int setStatusBarMode(Activity activity, boolean isFontColorDark) {
         @SystemType int result = 0;

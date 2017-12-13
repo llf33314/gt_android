@@ -8,6 +8,7 @@
     <color name="white">#ffffff</color>
     <color name="gray">#dddddd</color>
     <color name="gray_bg">#f6f6f6</color>
+    <color name="gray_bg_transparency">#30f6f6f6</color>
     <color name="login_un_enable">#fed0d0</color>
     <color name="login_enable">#ff4257</color>
     <color name="login_enable_p">#fa223a</color>

@@ -1,12 +1,9 @@
 package com.gt.gtapp.main;
 
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,7 +14,6 @@ import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
 import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.http.rxjava.RxBus;
-import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
 
 import java.util.ArrayList;
 import java.util.List;

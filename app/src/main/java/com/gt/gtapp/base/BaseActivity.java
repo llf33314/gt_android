@@ -1,6 +1,5 @@
 package com.gt.gtapp.base;
 
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
@@ -8,16 +7,15 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.gt.gtapp.R;
-import com.gt.gtapp.util.statusbar.StatusBarFontHelper;
+import com.gt.gtapp.utils.commonutil.ToastUtil;
+import com.gt.gtapp.utils.statusbar.StatusBarFontHelper;
 import com.gt.gtapp.utils.commonutil.BarUtils;
-import com.gt.gtapp.utils.commonutil.ConvertUtils;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import butterknife.ButterKnife;
@@ -31,8 +29,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     private TextView toolBarTitle;
     private ImageView toolBarBack;
     private ImageView toolSetting;
-    private ImageView toolmessage;
+    private ImageView toolMessage;
 
+    private BtnClickListener mBtnClickListener=new BtnClickListener();
     /**
      * 隐藏标题栏
      */
@@ -63,7 +62,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         toolBarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolBarBack = (ImageView) findViewById(R.id.toolbar_back);
         toolSetting = (ImageView) findViewById(R.id.toolbar_setting);
-        toolmessage = (ImageView) findViewById(R.id.toolbar_message);
+        toolMessage = (ImageView) findViewById(R.id.toolbar_message);
 
         switch (getToolBarType()) {
             case TOOLBAR_NOT:
@@ -84,12 +83,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
 
         //mToolbar.setPadding(0, BarUtils.getStatusBarHeight(this),0,0);
 
-        toolBarBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolBarBack.setOnClickListener(mBtnClickListener);
+        toolSetting.setOnClickListener(mBtnClickListener);
+        toolMessage.setOnClickListener(mBtnClickListener);
     }
 
     public void visibilityBack() {
@@ -137,7 +133,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         }
         mToolbar.setBackgroundColor(this.getResources().getColor(R.color.white));
         toolSetting.setVisibility(View.GONE);
-        toolmessage.setVisibility(View.GONE);
+        toolMessage.setVisibility(View.GONE);
         toolBarTitle.setVisibility(View.VISIBLE);
         toolBarTitle.setText(title);
         toolBarBack.setVisibility(View.VISIBLE);
@@ -161,7 +157,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
 
         mToolbar.setBackground(this.getResources().getDrawable(R.drawable.shape_toolbar_shade));
         toolSetting.setVisibility(View.VISIBLE);
-        toolmessage.setVisibility(View.VISIBLE);
+        toolMessage.setVisibility(View.VISIBLE);
         toolBarTitle.setVisibility(View.GONE);
         toolBarBack.setVisibility(View.GONE);
     }
@@ -201,5 +197,33 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         mToolbar.setVisibility(View.GONE);
     }
 
+    /**
+     * 隐藏标题栏 0
+     * 红色无标题 1
+     * 白底返回键 2
+     * 红色白标题 3
+     */
     public abstract int getToolBarType();
+
+    private class BtnClickListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+
+                case R.id.toolbar_back:
+                    onBackPressed();
+                    break;
+                case R.id.toolbar_setting:
+                    ToastUtil.getInstance().showToast("更多功能敬请期待");
+                    break;
+                case R.id.toolbar_message:
+                    ToastUtil.getInstance().showToast("更多功能敬请期待");
+                    break;
+                default:
+                    break;
+
+            }
+        }
+    }
 }

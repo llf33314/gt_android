@@ -8,6 +8,8 @@ import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.http.HttpResponseException;
 import com.gt.gtapp.http.retrofit.BaseResponse;
 import com.gt.gtapp.login.LoginActivity;
+import com.gt.gtapp.login.LoginHelper;
+import com.orhanobut.hawk.Hawk;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -40,19 +42,31 @@ public class ResultTransformer {
                 return new Observable<T>() {
                     @Override
                     protected void subscribeActual(Observer<? super T> observer) {
+                        String msg="";
+                        if (!TextUtils.isEmpty(tBaseResponse.getMsg())){
+                            msg=tBaseResponse.getMsg();
+                        }
                         if (tBaseResponse.isSuccess()) {
                             if (tBaseResponse.getData()!=null){//data为null时不调用 onSuccess  并且不返回原始数据
                                 observer.onNext(tBaseResponse.getData());
                             }
                             observer.onComplete();
                         } else  if(tBaseResponse.isTokenPast()){
-                            Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
-                            MyApplication.getAppContext().startActivity(intent);
-                        }else{
-                            String msg="";
-                            if (!TextUtils.isEmpty(tBaseResponse.getMsg())){
-                                msg=tBaseResponse.getMsg();
+                            //当前登录页面返回session过期 就是共享失败  判断是否缓存账号密码  有则自动刷新session 没有就调转到登录页面
+                            //如果刷新session失败了可能是密码改了 则也是跳转到登录页面 注意一下这里的对话框还是跟原来的一样就是多请求了俩个接口
+
+                            if (LoginHelper.isSaveAccountPsd()){
+                                //里面会处理好账号密码错误等
+                                LoginHelper.getNewSession((String)Hawk.get("accountLogin"),(String)Hawk.get("psd"));
+                            }else{
+                                Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
+                                if (MyApplication.getCurrentActivity().getClass().equals(LoginActivity.class)){
+                                    observer.onError(new HttpResponseException(tBaseResponse.getCode(),msg));//这个msg让Observer处理
+                                }else{
+                                    MyApplication.getAppContext().startActivity(intent);
+                                }
                             }
+                        }else{
                             observer.onError(new HttpResponseException(tBaseResponse.getCode(),msg));//这个msg让Observer处理
                         }
                     }
@@ -84,17 +98,21 @@ public class ResultTransformer {
                 return new Observable<BaseResponse>() {
                     @Override
                     protected void subscribeActual(Observer<? super BaseResponse> observer) {
+                        String msg="";
+                        if (!TextUtils.isEmpty(baseResponse.getMsg())){
+                            msg=baseResponse.getMsg();
+                        }
                         if (baseResponse.isSuccess()) {
                             observer.onNext(baseResponse);
                             observer.onComplete();
                         } else if(baseResponse.isTokenPast()){
                             Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
-                            MyApplication.getAppContext().startActivity(intent);
-                        }else{
-                            String msg="";
-                            if (!TextUtils.isEmpty(baseResponse.getMsg())){
-                                msg=baseResponse.getMsg();
+                            if (MyApplication.getCurrentActivity().getClass().equals(LoginActivity.class)){
+                                observer.onError(new HttpResponseException(baseResponse.getCode(),msg));//这个msg让Observer处理
+                            }else{
+                                MyApplication.getAppContext().startActivity(intent);
                             }
+                        }else{
                             observer.onError(new HttpResponseException(baseResponse.getCode(),msg));//这个msg让Observer处理
                         }
                     }

@@ -2,6 +2,7 @@ package com.gt.gtapp.http.rxjava.observer;
 
 
 import com.gt.gtapp.http.HttpResponseException;
+import com.gt.gtapp.http.store.PersistentCookieStore;
 import com.gt.gtapp.utils.Logger;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
 
@@ -55,7 +56,7 @@ public abstract class BaseObserver<T> implements Observer<T> {
             }
 
         }else {//(e instanceof RuntimeException)
-            Logger.e("HTTP","程序异常"+e.getMessage());
+            Logger.e("HTTP","程序异常:"+e.getMessage());
             ToastUtil.getInstance().showToast("后台数据有误！");
         }
 
@@ -77,6 +78,10 @@ public abstract class BaseObserver<T> implements Observer<T> {
      * 简单提示 服务器返回信息 若需要处理 则重写
      */
     protected void onFailed(HttpResponseException responseException) {
-        ToastUtil.getInstance().showNewShort(responseException.getMessage()+"["+responseException.getCode()+"]");
+        if (responseException.getCode()==2){//账号密码错误不提示code
+            ToastUtil.getInstance().showNewShort(responseException.getMessage());
+        }else{
+            ToastUtil.getInstance().showNewShort(responseException.getMessage()+"["+responseException.getCode()+"]");
+        }
     }
 }
