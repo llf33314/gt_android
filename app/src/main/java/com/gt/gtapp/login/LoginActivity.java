@@ -25,6 +25,7 @@ import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.LoginAccountBean;
 import com.gt.gtapp.bean.HttpCodeMsgBean;
 import com.gt.gtapp.bean.LoginFinishMsg;
+import com.gt.gtapp.bean.ShowLoginUiMsg;
 import com.gt.gtapp.bean.SignBean;
 import com.gt.gtapp.bean.StaffListIndustryBean;
 import com.gt.gtapp.http.HttpResponseException;
@@ -85,7 +86,6 @@ public class LoginActivity extends RxAppCompatActivity {
         ButterKnife.bind(this);
         StatusBarFontHelper.setStatusBarMode(this,true);
         init();
-
     }
     private void init(){
         loginAccount.addTextChangedListener(new LoginEditTextListener());
@@ -187,6 +187,7 @@ public class LoginActivity extends RxAppCompatActivity {
             }
         });
 
+        //关闭登录页面
         RxBus.get().toObservable(LoginFinishMsg.class)
                 .compose(SchedulerTransformer.<LoginFinishMsg>transformer())
                 .subscribe(new Consumer<LoginFinishMsg>() {
@@ -199,6 +200,15 @@ public class LoginActivity extends RxAppCompatActivity {
         if (!TextUtils.isEmpty(loginAccount.getText())&&!TextUtils.isEmpty(loginPsd.getText())){
             loginLogin.setEnabled(true);
         }
+        //极端情况下  才会执行到这里   比如改了密码-》登录成功后再用原来的账号登录登录不上
+        RxBus.get().toObservable(ShowLoginUiMsg.class)
+                .compose(SchedulerTransformer.<ShowLoginUiMsg>transformer())
+                .subscribe(new Consumer<ShowLoginUiMsg>() {
+                    @Override
+                    public void accept(@NonNull ShowLoginUiMsg showLoginUiMsg) throws Exception {
+                        animShowLoginView();
+                    }
+                });
 
     }
 
@@ -223,7 +233,9 @@ public class LoginActivity extends RxAppCompatActivity {
         animatorIconsUp.start();
         loginAnimatorSet.start();
         animatorBottomTextDown.start();
+        LoginHelper.loginUiIsShow=true;
     }
+
 
 
 

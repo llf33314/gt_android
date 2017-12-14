@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Process;
 
 import com.gt.gtapp.BuildConfig;
 import com.gt.gtapp.utils.Logger;
@@ -111,5 +112,9 @@ public class MyApplication extends Application {
 
     public static Context getAppContext(){
         return appContext;
+    }
+
+    public static void appExit(){
+        android.os.Process.killProcess(Process.myPid());
     }
 }

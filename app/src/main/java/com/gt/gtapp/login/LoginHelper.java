@@ -7,10 +7,12 @@ import com.google.gson.Gson;
 import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.HttpCodeMsgBean;
 import com.gt.gtapp.bean.LoginAccountBean;
+import com.gt.gtapp.bean.ShowLoginUiMsg;
 import com.gt.gtapp.bean.SignBean;
 import com.gt.gtapp.http.HttpResponseException;
 import com.gt.gtapp.http.retrofit.BaseResponse;
 import com.gt.gtapp.http.retrofit.HttpCall;
+import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.http.rxjava.observable.ResultTransformer;
 import com.gt.gtapp.http.store.PersistentCookieStore;
 import com.orhanobut.hawk.Hawk;
@@ -26,7 +28,12 @@ import io.reactivex.functions.Function;
 
 public class LoginHelper {
 
+    public static final String ACCOUNT_KEY="loginAccount";
+    public static final String PSD_KEY="loginPsd";
+
     private static Gson gson=new Gson();
+
+    public static boolean loginUiIsShow=false;
 
     /**
      * 账号密码请求getSign接口跟erp登录接口刷新Session
@@ -65,27 +72,30 @@ public class LoginHelper {
                         }else{
                             Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
                             //不是在登录页面刷新session 有可能是密码改了等
+                            clearAccountInfo();
                             if (!MyApplication.getCurrentActivity().getClass().equals(LoginActivity.class)){
                                 MyApplication.getAppContext().startActivity(intent);
+                            }else if (!loginUiIsShow){
+                                //是否显示登录UI 极端情况下才会走到这里
+                                RxBus.get().post(new ShowLoginUiMsg());
                             }
-                            removeAllCookie();
                             return Observable.error(new HttpResponseException(2,"用户名或密码错误"));
                         }
                     }
                 });
     }
     public static void saveAccountPsdHawk(String account,String psd){
-        Hawk.put("loginAccount",account);
-        Hawk.put("loginPsd",psd);
+        Hawk.put(ACCOUNT_KEY,account);
+        Hawk.put(PSD_KEY,psd);
     }
 
     public static void clearAccountPsdHawk(){
-        Hawk.delete("loginAccount");
-        Hawk.delete("loginPsd");
+        Hawk.delete(ACCOUNT_KEY);
+        Hawk.delete(PSD_KEY);
     }
 
     public static boolean isSaveAccountPsd(){
-        return !TextUtils.isEmpty((String)Hawk.get("loginAccount"))&&!TextUtils.isEmpty((String)Hawk.get("loginPsd"));
+        return !TextUtils.isEmpty((String)Hawk.get(ACCOUNT_KEY))&&!TextUtils.isEmpty((String)Hawk.get(PSD_KEY));
     }
 
     /**
@@ -105,6 +115,7 @@ public class LoginHelper {
     public static void clearAccountInfo(){
         removeAllCookie();
         Hawk.delete(StaffListIndustryActivity.STAFF_CHOOSE_URL);
-
+        clearAccountPsdHawk();
     }
+
 }

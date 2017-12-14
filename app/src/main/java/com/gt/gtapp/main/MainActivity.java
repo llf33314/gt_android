@@ -12,8 +12,10 @@ import android.widget.TextView;
 
 import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
+import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.http.rxjava.RxBus;
+import com.gt.gtapp.utils.commonutil.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,8 @@ public class MainActivity extends BaseActivity {
     private int currentFragment = 0;
 
     private String url;
+
+    private long exitTime=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +142,13 @@ public class MainActivity extends BaseActivity {
             if (duofriendFragment.onBackKeyDown()){
                return true;
             }else{
-                return super.onKeyDown(keyCode, event);
+                if ((System.currentTimeMillis() - exitTime) > 2000) {
+                   ToastUtil.getInstance().showToast("再按一次退出");
+                    exitTime = System.currentTimeMillis();
+                } else {
+                    MyApplication.appExit();
+                }
+                return true;
             }
 
         }

@@ -7,6 +7,7 @@ import android.support.annotation.RequiresApi;
 
 
 import com.gt.gtapp.http.HttpConfig;
+import com.gt.gtapp.login.LoginHelper;
 import com.gt.gtapp.utils.Logger;
 import com.tencent.smtt.sdk.CookieManager;
 import com.tencent.smtt.sdk.CookieSyncManager;
@@ -42,6 +43,7 @@ public class CookieJarImpl implements CookieJar {
         Logger.i("GtCookie","saveFromResponse url="+url.host()+" url.host="+url.host()+"  cookies.size="+cookies.size()+" cookies="+cookies.get(0).toString());
 
         if (cookies!=null&&cookies.size()>0&&HttpConfig.ERP_LOGIN_URL.equals(url.toString())) {
+            LoginHelper.removeAllCookie();
             saveCookies(url.host(),cookies);
             cookieStore.add(DEFAULT_COOKIE_NAME, cookies);
         }
@@ -51,7 +53,6 @@ public class CookieJarImpl implements CookieJar {
     @Override
     public synchronized List<Cookie> loadForRequest(HttpUrl url) {
         Logger.i("GtCookie","loadForRequest url="+url.host());
-        String host=url.host();
         List<Cookie> cookies= cookieStore.get(DEFAULT_COOKIE_NAME);
         return cookies;
     }
@@ -69,8 +70,6 @@ public class CookieJarImpl implements CookieJar {
         for (Cookie c:cookies){
             mCookieManager.setCookie(url,c.toString());
         }
-
-
         if (Build.VERSION.SDK_INT < 21) {
          CookieSyncManager.createInstance(context).sync();
         } else {

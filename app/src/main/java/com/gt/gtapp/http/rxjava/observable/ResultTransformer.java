@@ -2,14 +2,26 @@ package com.gt.gtapp.http.rxjava.observable;
 
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.gt.gtapp.base.MyApplication;
+import com.gt.gtapp.bean.LoginAccountBean;
+import com.gt.gtapp.bean.ShowLoginUiMsg;
+import com.gt.gtapp.bean.StaffListIndustryBean;
 import com.gt.gtapp.http.HttpResponseException;
 import com.gt.gtapp.http.retrofit.BaseResponse;
+import com.gt.gtapp.http.retrofit.HttpCall;
+import com.gt.gtapp.http.rxjava.RxBus;
+import com.gt.gtapp.http.rxjava.observer.BaseObserver;
 import com.gt.gtapp.login.LoginActivity;
 import com.gt.gtapp.login.LoginHelper;
+import com.gt.gtapp.login.StaffListIndustryActivity;
+import com.gt.gtapp.main.MainActivity;
 import com.orhanobut.hawk.Hawk;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -57,7 +69,49 @@ public class ResultTransformer {
 
                             if (LoginHelper.isSaveAccountPsd()){
                                 //里面会处理好账号密码错误等
-                                LoginHelper.getNewSession((String)Hawk.get("accountLogin"),(String)Hawk.get("psd"));
+                                LoginHelper.getNewSession((String)Hawk.get(LoginHelper.ACCOUNT_KEY),(String)Hawk.get(LoginHelper.PSD_KEY))
+                                        .flatMap(ResultTransformer.<LoginAccountBean>flatMap())
+                                        .flatMap(new Function<LoginAccountBean, ObservableSource<BaseResponse<List<StaffListIndustryBean>>>>() {
+                                            @Override
+                                            public ObservableSource<BaseResponse<List<StaffListIndustryBean>>> apply(@NonNull LoginAccountBean loginAccountBean) throws Exception {
+                                                MyApplication.setAccountType(loginAccountBean.getAccountType());
+                                                //老板账号
+                                                if (loginAccountBean.getAccountType()==1){
+                                                    String duoFriendUrl=loginAccountBean.getHomeUrl();
+
+                                                    Intent intent=new Intent(MyApplication.getCurrentActivity(),MainActivity.class);
+                                                    //清除所有activity
+                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                    intent.putExtra("url",duoFriendUrl);
+                                                    MyApplication.getCurrentActivity().startActivity(intent);
+
+                                                    return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));
+                                                }else{
+                                                    //员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
+                                                    return HttpCall.getApiService().staffListIndustry();
+                                                }
+                                            }
+                                        })
+                                        .compose(ResultTransformer.<List<StaffListIndustryBean>>transformer())
+                                        .subscribe(new BaseObserver<List<StaffListIndustryBean>>() {
+                                            @Override
+                                            protected void onSuccess(List<StaffListIndustryBean> staffListIndustryBeanList) {
+                                                //获取到员工账号的列表
+                                                Intent intent=new Intent(MyApplication.getCurrentActivity(),StaffListIndustryActivity.class);
+                                                intent.putParcelableArrayListExtra("staffListIndustryList", (ArrayList<? extends Parcelable>) staffListIndustryBeanList);
+                                                MyApplication.getCurrentActivity().startActivity(intent);
+                                            }
+
+                                            @Override
+                                            protected void onFailed(HttpResponseException responseException) {
+                                                super.onFailed(responseException);
+                                                LoginHelper.clearAccountInfo();
+                                                if (!LoginHelper.loginUiIsShow){
+                                                    RxBus.get().post(new ShowLoginUiMsg());
+                                                }
+                                            }
+                                        });
+
                             }else{
                                 Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
                                 if (MyApplication.getCurrentActivity().getClass().equals(LoginActivity.class)){
@@ -106,12 +160,49 @@ public class ResultTransformer {
                             observer.onNext(baseResponse);
                             observer.onComplete();
                         } else if(baseResponse.isTokenPast()){
-                            Intent intent=new Intent(MyApplication.getAppContext(), LoginActivity.class);
-                            if (MyApplication.getCurrentActivity().getClass().equals(LoginActivity.class)){
-                                observer.onError(new HttpResponseException(baseResponse.getCode(),msg));//这个msg让Observer处理
-                            }else{
-                                MyApplication.getAppContext().startActivity(intent);
-                            }
+                            //里面会处理好账号密码错误等
+                            LoginHelper.getNewSession((String)Hawk.get(LoginHelper.ACCOUNT_KEY),(String)Hawk.get(LoginHelper.PSD_KEY))
+                                    .flatMap(ResultTransformer.<LoginAccountBean>flatMap())
+                                    .flatMap(new Function<LoginAccountBean, ObservableSource<BaseResponse<List<StaffListIndustryBean>>>>() {
+                                        @Override
+                                        public ObservableSource<BaseResponse<List<StaffListIndustryBean>>> apply(@NonNull LoginAccountBean loginAccountBean) throws Exception {
+                                            MyApplication.setAccountType(loginAccountBean.getAccountType());
+                                            //老板账号
+                                            if (loginAccountBean.getAccountType()==1){
+                                                String duoFriendUrl=loginAccountBean.getHomeUrl();
+
+                                                Intent intent=new Intent(MyApplication.getCurrentActivity(),MainActivity.class);
+                                                //清除所有activity
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                intent.putExtra("url",duoFriendUrl);
+                                                MyApplication.getCurrentActivity().startActivity(intent);
+
+                                                return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));
+                                            }else{
+                                                //员工账号  老板账号直接跳转到网页  员工账号再请求接口或者erp
+                                                return HttpCall.getApiService().staffListIndustry();
+                                            }
+                                        }
+                                    })
+                                    .compose(ResultTransformer.<List<StaffListIndustryBean>>transformer())
+                                    .subscribe(new BaseObserver<List<StaffListIndustryBean>>() {
+                                        @Override
+                                        protected void onSuccess(List<StaffListIndustryBean> staffListIndustryBeanList) {
+                                            //获取到员工账号的列表
+                                            Intent intent=new Intent(MyApplication.getCurrentActivity(),StaffListIndustryActivity.class);
+                                            intent.putParcelableArrayListExtra("staffListIndustryList", (ArrayList<? extends Parcelable>) staffListIndustryBeanList);
+                                            MyApplication.getCurrentActivity().startActivity(intent);
+                                        }
+
+                                        @Override
+                                        protected void onFailed(HttpResponseException responseException) {
+                                            super.onFailed(responseException);
+                                            LoginHelper.clearAccountInfo();
+                                            if (!LoginHelper.loginUiIsShow){
+                                                RxBus.get().post(new ShowLoginUiMsg());
+                                            }
+                                        }
+                                    });
                         }else{
                             observer.onError(new HttpResponseException(baseResponse.getCode(),msg));//这个msg让Observer处理
                         }
