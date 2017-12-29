@@ -125,11 +125,12 @@ public class PersonFragment extends Fragment {
                                     httpCodeMsgBean = new Gson().fromJson(jsonResult, HttpCodeMsgBean.class);
                                     if ("0".equals(httpCodeMsgBean.getCode())) {
                                         LoginHelper.clearAccountInfo();
-
+                                        MyApplication.deleteHawk();
                                         Intent intent=new Intent(getActivity(), LoginActivity.class);
                                         intent.putExtra("anim_start_time",1);
                                         getActivity().startActivity(intent);
                                         getActivity().finish();
+
                                     }else{
                                         ToastUtil.getInstance().showToast(httpCodeMsgBean.getMsg());
                                     }

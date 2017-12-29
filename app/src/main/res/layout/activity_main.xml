@@ -13,6 +13,8 @@
         android:layout_weight="1"
         />
     <LinearLayout
+        android:background="@color/white"
+        android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_45"
         android:orientation="horizontal"

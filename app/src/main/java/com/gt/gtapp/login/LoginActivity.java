@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.gt.gtapp.R;
+import com.gt.gtapp.base.BaseConstant;
 import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.LoginAccountBean;
 import com.gt.gtapp.bean.HttpCodeMsgBean;
@@ -38,6 +39,8 @@ import com.gt.gtapp.http.rxjava.observable.SchedulerTransformer;
 import com.gt.gtapp.http.rxjava.observer.BaseObserver;
 import com.gt.gtapp.http.store.PersistentCookieStore;
 import com.gt.gtapp.main.MainActivity;
+import com.gt.gtapp.update.UpdateManager;
+import com.gt.gtapp.utils.commonutil.BarUtils;
 import com.gt.gtapp.utils.statusbar.StatusBarFontHelper;
 import com.gt.gtapp.utils.commonutil.ConvertUtils;
 import com.gt.gtapp.widget.ImageCheckBox;
@@ -84,8 +87,13 @@ public class LoginActivity extends RxAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        StatusBarFontHelper.setStatusBarMode(this,true);
+        //StatusBarFontHelper.setStatusBarMode(this,true);
+        BarUtils.setStatusBarColor(this,0xffffffff,0);
         init();
+        if (MyApplication.isNeedUpdate()) {
+            UpdateManager updateManager = new UpdateManager(this, BaseConstant.UPDATE_NAME, UpdateManager.UPDATE_BADGE_AND_DIALOG);
+            updateManager.requestUpdate();
+        }
     }
     private void init(){
         loginAccount.addTextChangedListener(new LoginEditTextListener());
@@ -127,6 +135,9 @@ public class LoginActivity extends RxAppCompatActivity {
 
                                                 Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                                                 intent.putExtra("url",duoFriendUrl);
+                                                if (!TextUtils.isEmpty(duoFriendUrl)){
+                                                    Hawk.put("homeURL",duoFriendUrl);
+                                                }
                                                 startActivity(intent);
                                                 //这里不finish 其他地方会RxBus通知finish
                                                 return Observable.error(new HttpResponseException(HttpResponseException.SUCCESS_BREAK,""));

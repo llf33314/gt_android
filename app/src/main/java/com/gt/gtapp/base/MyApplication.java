@@ -17,6 +17,7 @@ import com.tencent.smtt.sdk.QbSdk;
 
 public class MyApplication extends Application {
 
+    private static boolean isNeedUpdate=true;
     private static Activity currentActivity;
 
     private static int accountType;
@@ -97,7 +98,21 @@ public class MyApplication extends Application {
 
 
 
-
+    public static void deleteHawk(){
+        Hawk.delete(BaseConstant.HAWK_LEFT_IS_SHOW_HEADER);
+    }
+    public static void showHeader(final boolean isShow){
+        ((BaseActivity) (MyApplication.getCurrentActivity())). runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (isShow) {
+                    ((BaseActivity) (MyApplication.getCurrentActivity())).showToolBar();
+                } else {
+                    ((BaseActivity) (MyApplication.getCurrentActivity())).goneToolBar();
+                }
+            }
+        });
+    }
     public static Activity getCurrentActivity(){
         return currentActivity;
     }
@@ -116,5 +131,12 @@ public class MyApplication extends Application {
 
     public static void appExit(){
         android.os.Process.killProcess(Process.myPid());
+    }
+    public static boolean isNeedUpdate() {
+        return isNeedUpdate;
+    }
+
+    public static void setNeedUpdate(boolean needUpdate) {
+        isNeedUpdate = needUpdate;
     }
 }

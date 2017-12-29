@@ -12,10 +12,15 @@ import android.widget.TextView;
 
 import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
+import com.gt.gtapp.base.BaseConstant;
 import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.http.rxjava.RxBus;
+import com.gt.gtapp.update.UpdateManager;
+import com.gt.gtapp.utils.commonutil.BarUtils;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
+import com.gt.gtapp.web.GtBridge;
+import com.orhanobut.hawk.Hawk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +43,14 @@ public class MainActivity extends BaseActivity {
     ImageView mainBottomPersonIv;
     @BindView(R.id.main_bottom_person_tv)
     TextView mainBottomPersonTv;
+    @BindView(R.id.bottomLayout)
+    LinearLayout bottomLayout;
 
     private FragmentManager mFragmentManager;
     private FragmentTransaction mFragmentTransaction;
     private DuofriendFragment duofriendFragment;
     private PersonFragment personFragment;
+    GtBridge gtBridge;
     /**
      * 方便操作
      */
@@ -54,7 +62,7 @@ public class MainActivity extends BaseActivity {
 
     private String url;
 
-    private long exitTime=0;
+    private long exitTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +70,15 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         init();
+        if (MyApplication.isNeedUpdate()) {
+            UpdateManager updateManager = new UpdateManager(this,  BaseConstant.UPDATE_NAME, UpdateManager.UPDATE_BADGE_AND_DIALOG);
+            updateManager.requestUpdate();
+        }
     }
 
     private void init() {
-        url=getIntent().getStringExtra("url");
+        gtBridge = new GtBridge();
+        url = getIntent().getStringExtra("url");
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         duofriendFragment = new DuofriendFragment(url);
@@ -110,6 +123,8 @@ public class MainActivity extends BaseActivity {
                     mFragmentTransaction.commit();
                     currentFragment = 0;
                     changeStyle(TOOLBAR_RED_STYLE);
+                    boolean isLeftHeaderShow = Hawk.get(BaseConstant.HAWK_LEFT_IS_SHOW_HEADER, true);
+
                 }
 
                 break;
@@ -127,7 +142,7 @@ public class MainActivity extends BaseActivity {
 
                     mFragmentTransaction.commit();
                     currentFragment = 1;
-                    changeStyle(TOOLBAR_RED_WHITE_TITLE_STYLE,"个人中心");
+                    changeStyle(TOOLBAR_RED_WHITE_TITLE_STYLE, "个人中心");
                 }
                 break;
 
@@ -135,15 +150,16 @@ public class MainActivity extends BaseActivity {
                 break;
         }
     }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (duofriendFragment.onBackKeyDown()){
-               return true;
-            }else{
+            if (duofriendFragment.onBackKeyDown()) {
+                return true;
+            } else {
                 if ((System.currentTimeMillis() - exitTime) > 2000) {
-                   ToastUtil.getInstance().showToast("再按一次退出");
+                    ToastUtil.getInstance().showToast("再按一次退出");
                     exitTime = System.currentTimeMillis();
                 } else {
                     MyApplication.appExit();
@@ -153,5 +169,13 @@ public class MainActivity extends BaseActivity {
 
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void showBottom(boolean isShow) {
+        bottomLayout.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    }
+
+    public DuofriendFragment getDuoFriendFragment() {
+        return duofriendFragment;
     }
 }

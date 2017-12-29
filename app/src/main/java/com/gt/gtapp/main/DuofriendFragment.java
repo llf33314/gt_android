@@ -1,20 +1,21 @@
 package com.gt.gtapp.main;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.gt.gtapp.R;
-import com.gt.gtapp.web.GtBrideg;
+import com.gt.gtapp.web.GtBridge;
+import com.orhanobut.hawk.Hawk;
 import com.tencent.smtt.export.external.interfaces.JsResult;
 import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
 import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
@@ -33,12 +34,13 @@ import butterknife.Unbinder;
  * Created by wzb on 2017/12/6 0006.
  */
 
+@SuppressLint("ValidFragment")
 public class DuofriendFragment extends Fragment {
 
     @BindView(R.id.main_webView)
     WebView webView;
     Unbinder unbinder;
-
+    GtBridge gtBridge;
     String url;
 
     public DuofriendFragment(String url) {
@@ -55,10 +57,10 @@ public class DuofriendFragment extends Fragment {
     }
 
     private void initWebview(){
-        //webView.loadUrl("https://webapp.deeptel.com.cn/manage/#/index");
+        //webView.loadUrl("http://192.168.3.32:8085");
         webView.loadUrl(url);
-        //webView.loadUrl("https://baidu.com");
-        webView.addJavascriptInterface(new GtBrideg(), "androidTest");//添加js监听 这样html就能调用客户端
+        gtBridge=new GtBridge();
+        webView.addJavascriptInterface(gtBridge, "AndroidAppJs");//添加js监听 这样html就能调用客户端
 
         webView.setWebChromeClient(webChromeClient);
         webView.setWebViewClient(webViewClient);
@@ -171,10 +173,20 @@ public class DuofriendFragment extends Fragment {
     public void reLoad(){
         webView.reload();
     }
-
+    public void goToHomeUrl(){
+        String homeURL= Hawk.get("homeURL","");
+        if (!TextUtils.isEmpty(homeURL)){
+            Log.d("goToHomeUrl","goToHomeUrl="+homeURL);
+            webView.loadUrl(homeURL);
+            gtBridge.showBottom(true);
+            gtBridge.showHeader(true);
+            //webView.reload();
+        }
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
     }
+
 }

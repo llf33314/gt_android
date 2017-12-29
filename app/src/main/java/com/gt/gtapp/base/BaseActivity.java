@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -28,9 +30,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     private RelativeLayout mToolbar;
     private TextView toolBarTitle;
     private ImageView toolBarBack;
-    private ImageView toolSetting;
-    private ImageView toolMessage;
-
+    private RelativeLayout messageLayout;
+    private RelativeLayout settingLayout;
+    private View activityView;
     private BtnClickListener mBtnClickListener=new BtnClickListener();
     /**
      * 隐藏标题栏
@@ -61,8 +63,8 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         //减去状态栏高度
         toolBarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolBarBack = (ImageView) findViewById(R.id.toolbar_back);
-        toolSetting = (ImageView) findViewById(R.id.toolbar_setting);
-        toolMessage = (ImageView) findViewById(R.id.toolbar_message);
+        messageLayout = (RelativeLayout) findViewById(R.id.messageLayout);
+        settingLayout = (RelativeLayout) findViewById(R.id.settingLayout);
 
         switch (getToolBarType()) {
             case TOOLBAR_NOT:
@@ -84,8 +86,8 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         //mToolbar.setPadding(0, BarUtils.getStatusBarHeight(this),0,0);
 
         toolBarBack.setOnClickListener(mBtnClickListener);
-        toolSetting.setOnClickListener(mBtnClickListener);
-        toolMessage.setOnClickListener(mBtnClickListener);
+        messageLayout.setOnClickListener(mBtnClickListener);
+        settingLayout.setOnClickListener(mBtnClickListener);
     }
 
     public void visibilityBack() {
@@ -95,7 +97,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     @CallSuper
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
-        View activityView = LayoutInflater.from(this).inflate(layoutResID, null, false);
+        activityView = LayoutInflater.from(this).inflate(layoutResID, null, false);
         ViewGroup viewGroup = (ViewGroup) mToolbar.getParent();
         viewGroup.addView(activityView);
         //空出边距给toolbar
@@ -132,8 +134,8 @@ public abstract class BaseActivity extends RxAppCompatActivity {
             mToolbar.setPadding(0, BarUtils.getStatusBarHeight(this), 0, 0);
         }
         mToolbar.setBackgroundColor(this.getResources().getColor(R.color.white));
-        toolSetting.setVisibility(View.GONE);
-        toolMessage.setVisibility(View.GONE);
+      //  toolSetting.setVisibility(View.GONE);
+      //  toolMessage.setVisibility(View.GONE);
         toolBarTitle.setVisibility(View.VISIBLE);
         toolBarTitle.setText(title);
         toolBarBack.setVisibility(View.VISIBLE);
@@ -156,8 +158,6 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         }
 
         mToolbar.setBackground(this.getResources().getDrawable(R.drawable.shape_toolbar_shade));
-        toolSetting.setVisibility(View.VISIBLE);
-        toolMessage.setVisibility(View.VISIBLE);
         toolBarTitle.setVisibility(View.GONE);
         toolBarBack.setVisibility(View.GONE);
     }
@@ -194,9 +194,19 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     }
 
     public void goneToolBar() {
+        Log.d("goneToolBar","goneToolBar");
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) activityView.getLayoutParams();
+        lp.setMargins(0, BarUtils.getStatusBarHeight(this), 0, 0);
+        activityView.setLayoutParams(lp);
         mToolbar.setVisibility(View.GONE);
+        BarUtils.setStatusBarColor(this,getResources().getColor(R.color.launch_gray));
     }
-
+    public void showToolBar() {
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) activityView.getLayoutParams();
+        lp.setMargins(0, mToolbar.getLayoutParams().height, 0, 0);
+        activityView.setLayoutParams(lp);
+        mToolbar.setVisibility(View.VISIBLE);
+    }
     /**
      * 隐藏标题栏 0
      * 红色无标题 1
@@ -214,10 +224,10 @@ public abstract class BaseActivity extends RxAppCompatActivity {
                 case R.id.toolbar_back:
                     onBackPressed();
                     break;
-                case R.id.toolbar_setting:
+                case R.id.messageLayout:
                     ToastUtil.getInstance().showToast("更多功能敬请期待");
                     break;
-                case R.id.toolbar_message:
+                case R.id.settingLayout:
                     ToastUtil.getInstance().showToast("更多功能敬请期待");
                     break;
                 default:

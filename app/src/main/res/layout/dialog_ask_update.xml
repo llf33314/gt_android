@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/dp_295"
+    android:layout_height="@dimen/dp_193"
+    android:background="@drawable/white_radius_bg"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textColor="#333333"
+        android:textSize="15sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#dcdcdc" />
+
+        <TextView
+            android:gravity="center"
+            android:id="@+id/dialog_content"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_90"
+            android:layout_gravity="center"
+            android:textColor="#666666"
+            android:textSize="@dimen/dp_15" />
+
+        <Button
+            android:textColor="#f04a4a"
+            android:background="@drawable/selector_white_button"
+            android:text="@string/update_later"
+            android:id="@+id/cancel"
+            android:layout_width="@dimen/dp_121"
+            android:layout_height="@dimen/dp_42"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="15dp"
+            android:textSize="@dimen/dp_15" />
+
+        <Button
+            android:textColor="#fff"
+            android:background="@drawable/selector_red_button"
+            android:layout_alignParentRight="true"
+            android:text="@string/update_immediately"
+            android:id="@+id/confirm"
+            android:layout_width="@dimen/dp_121"
+            android:layout_height="@dimen/dp_42"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="15dp"
+            android:textSize="@dimen/dp_15" />
+        <ProgressBar
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_20"
+            android:layout_centerVertical="true"
+            android:visibility="gone"
+            android:max="100"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/bar"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            />
+    </RelativeLayout>
+
+</LinearLayout>

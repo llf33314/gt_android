@@ -10,14 +10,32 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 
+import com.gt.gtapp.base.BaseActivity;
+import com.gt.gtapp.base.BaseConstant;
 import com.gt.gtapp.base.MyApplication;
+import com.gt.gtapp.bean.StaffListIndustryBean;
+import com.gt.gtapp.http.HttpResponseException;
+import com.gt.gtapp.http.retrofit.BaseResponse;
+import com.gt.gtapp.http.retrofit.HttpCall;
+import com.gt.gtapp.http.rxjava.observable.DialogTransformer;
+import com.gt.gtapp.http.rxjava.observable.ResultTransformer;
+import com.gt.gtapp.http.rxjava.observer.BaseObserver;
+import com.gt.gtapp.login.LoginActivity;
+import com.gt.gtapp.login.StaffListIndustryActivity;
+import com.gt.gtapp.main.DuofriendFragment;
+import com.gt.gtapp.main.MainActivity;
+import com.gt.gtapp.utils.commonutil.AppManager;
 import com.gt.gtapp.utils.commonutil.AppUtils;
 import com.gt.gtapp.utils.commonutil.ClipboardUtils;
 import com.gt.gtapp.utils.commonutil.IntentUtils;
@@ -25,30 +43,107 @@ import com.gt.gtapp.utils.commonutil.NetworkUtils;
 import com.gt.gtapp.utils.commonutil.StringUtils;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
 import com.gt.gtapp.utils.commonutil.Utils;
+import com.orhanobut.hawk.Hawk;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by wzb on 2017/11/30 0030.
  */
 
-public class GtBrideg {
+public class GtBridge {
     /**
-     * 打开安卓原生界面
-     * @param activityPackageName  完整路径包名
+     * 回到概况页面
      */
     @JavascriptInterface
-    public String startActivity(String activityPackageName){
-        String res="";
+    public void goToHomeUrl() {
+        DuofriendFragment duofriendFragment=((MainActivity) (MyApplication.getCurrentActivity())).getDuoFriendFragment();
+        if (duofriendFragment!=null){
+            duofriendFragment.goToHomeUrl();
+        }
+    }
+    /**
+     * 是否显示消息列表
+     */
+    @JavascriptInterface
+    public void showMessage() {
+        Toast.makeText(MyApplication.getAppContext(),"您有新的消息来了",Toast.LENGTH_LONG).show();
+    }
+    /**
+     * 是否显示App底部
+     */
+    @JavascriptInterface
+    public void showBottom(final boolean isShow) {
+        Log.d("bottom","showBottom="+isShow);
+        ((MainActivity) (MyApplication.getCurrentActivity())). runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (isShow) {
+                    ((MainActivity) (MyApplication.getCurrentActivity())).showBottom(isShow);
+                } else {
+                    ((MainActivity) (MyApplication.getCurrentActivity())).showBottom(isShow);
+                }
+            }
+        });
+    }
+    /**
+     * 是否显示App头部
+     */
+    @JavascriptInterface
+    public void showHeader(final boolean isShow) {
+        Log.d("showHeader","showHeader="+isShow);
+        Hawk.put(BaseConstant.HAWK_LEFT_IS_SHOW_HEADER,isShow);
+        MyApplication.showHeader(isShow);
+    }
+    /**
+     * 切换行业
+     */
+    @JavascriptInterface
+    public void switchIndustry() {
+        HttpCall.getApiService().staffListIndustry().compose(ResultTransformer.<List<StaffListIndustryBean>>transformer())
+                .compose(new DialogTransformer().<List<StaffListIndustryBean>>transformer())
+                .subscribe(new BaseObserver<List<StaffListIndustryBean>>() {
+                    @Override
+                    protected void onSuccess(List<StaffListIndustryBean> staffListIndustryBeanList) {
+                        //获取上次点击选择记录的Hawk
+                        //获取到员工账号的列表
+                        Intent intent = new Intent(MyApplication.getAppContext(), StaffListIndustryActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putParcelableArrayListExtra("staffListIndustryList", (ArrayList<? extends Parcelable>) staffListIndustryBeanList);
+                        MyApplication.getAppContext().startActivity(intent);
+                    }
+
+                    @Override
+                    protected void onFailed(HttpResponseException responseException) {
+                        super.onFailed(responseException);
+                        if (responseException.getCode() == BaseResponse.TOKEN_PAST_TIME) {
+                            //animShowLoginView();
+                            //session过期 请求刷新session并且登录其实就是再调用login按钮
+
+                        }
+                    }
+                });
+
+    }
+
+    /**
+     * 打开安卓原生界面
+     *
+     * @param activityPackageName 完整路径包名
+     */
+    @JavascriptInterface
+    public String startActivity(String activityPackageName) {
+        String res = "";
         try {
-            Class c=Class.forName(activityPackageName);
-            Intent intent=new Intent(MyApplication.getAppContext(),c);
+            Class c = Class.forName(activityPackageName);
+            Intent intent = new Intent(MyApplication.getAppContext(), c);
             MyApplication.getAppContext().startActivity(intent);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            res="找不到该页面路径";
-        }finally {
+            res = "找不到该页面路径";
+        } finally {
             return res;
         }
     }
@@ -77,35 +172,35 @@ public class GtBrideg {
      * @return
      */
     @JavascriptInterface
-    public int getStatusHeight()
-    {
-        Context context= Utils.getContext();
+    public int getStatusHeight() {
+        Context context = Utils.getContext();
         int statusHeight = -1;
-        try
-        {
+        try {
             Class<?> clazz = Class.forName("com.android.internal.R$dimen");
             Object object = clazz.newInstance();
             int height = Integer.parseInt(clazz.getField("status_bar_height")
                     .get(object).toString());
             statusHeight = context.getResources().getDimensionPixelSize(height);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return statusHeight;
     }
+
     /**
      * 获取 虚拟按键的高度
+     *
      * @return
      */
     @JavascriptInterface
-    public  int getBottomStatusHeight(){
+    public int getBottomStatusHeight() {
         int totalHeight = getDpi();
 
         int contentHeight = getScreenHeight();
 
-        return totalHeight  - contentHeight;
+        return totalHeight - contentHeight;
     }
+
     /**
      * 复制文本到剪贴板
      */
@@ -121,6 +216,7 @@ public class GtBrideg {
     public CharSequence getText() {
         return ClipboardUtils.getText();
     }
+
     /**
      * 获取设备系统版本号
      */
@@ -142,16 +238,17 @@ public class GtBrideg {
         }
         return model;
     }
+
     /**
      * 获取厂商设备
      */
     @JavascriptInterface
-    public String getProductName(){
+    public String getProductName() {
         String productName = "";
         try {
-            Class<?> c=Class.forName("android.os.SystemProperties");
-            Method get=c.getMethod("get",String.class);
-            productName=(String)get.invoke(c,"ro.product.brand");
+            Class<?> c = Class.forName("android.os.SystemProperties");
+            Method get = c.getMethod("get", String.class);
+            productName = (String) get.invoke(c, "ro.product.brand");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -172,7 +269,7 @@ public class GtBrideg {
      */
     @JavascriptInterface
     public boolean isConnected() {
-        return  NetworkUtils.isConnected();
+        return NetworkUtils.isConnected();
     }
 
     /**
@@ -279,7 +376,9 @@ public class GtBrideg {
      */
     @JavascriptInterface
     public void sendSmsSilent(final String phoneNumber, final String content) {
-        if (StringUtils.isEmpty(content)) {return;}
+        if (StringUtils.isEmpty(content)) {
+            return;
+        }
         PendingIntent sentIntent = PendingIntent.getBroadcast(Utils.getContext(), 0, new Intent(), 0);
         SmsManager smsManager = SmsManager.getDefault();
         if (content.length() >= 70) {
@@ -347,8 +446,8 @@ public class GtBrideg {
      * 获取屏幕分辨率dip
      */
     @JavascriptInterface
-    public int getDpi(){
-        Context context=Utils.getContext();
+    public int getDpi() {
+        Context context = Utils.getContext();
         int dpi = 0;
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = windowManager.getDefaultDisplay();
@@ -358,10 +457,10 @@ public class GtBrideg {
         try {
             c = Class.forName("android.view.Display");
             @SuppressWarnings("unchecked")
-            Method method = c.getMethod("getRealMetrics",DisplayMetrics.class);
+            Method method = c.getMethod("getRealMetrics", DisplayMetrics.class);
             method.invoke(display, displayMetrics);
-            dpi=displayMetrics.heightPixels;
-        }catch(Exception e){
+            dpi = displayMetrics.heightPixels;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return dpi;
@@ -371,7 +470,7 @@ public class GtBrideg {
      * 会被下一条覆盖
      */
     @JavascriptInterface
-    public void showToast(String text){
+    public void showToast(String text) {
         ToastUtil.getInstance().showToast(text);
     }
 
@@ -379,7 +478,7 @@ public class GtBrideg {
      * 测试
      */
     @JavascriptInterface
-    public String testFromJs(String fromJsString){
+    public String testFromJs(String fromJsString) {
         ToastUtil.getInstance().showToast(fromJsString);
         return "from android";
     }

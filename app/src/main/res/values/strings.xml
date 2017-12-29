@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">多粉</string>
+    <string name="update_later">稍后更新</string>
+    <string name="update_immediately">立即更新</string>
 </resources>

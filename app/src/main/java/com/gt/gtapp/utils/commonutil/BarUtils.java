@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
@@ -21,6 +22,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+
+import com.gt.gtapp.R;
 
 import java.lang.reflect.Method;
 
@@ -97,8 +100,27 @@ public final class BarUtils {
             }
             fitWindowAndClipPadding(activity);
         }
-    }
 
+    }
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void compat(Activity activity, int drawable)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+                View statusBarView = (View) activity.findViewById(android.R.id.statusBarBackground);
+                statusBarView.setBackgroundResource(drawable);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+        {
+            ViewGroup contentView = (ViewGroup) activity.findViewById(android.R.id.content);
+            View statusBarView = new View(activity);
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getStatusBarHeight(activity));
+            statusBarView.setBackgroundResource(drawable);
+            contentView.addView(statusBarView, lp);
+        }
+
+    }
     private static int getStatusBarColor(@ColorInt final int color, final int alpha) {
         if (alpha == 0) return color;
         float a = 1 - alpha / 255f;
