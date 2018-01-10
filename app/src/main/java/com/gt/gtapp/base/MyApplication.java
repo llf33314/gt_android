@@ -5,9 +5,14 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Process;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.gt.gtapp.BuildConfig;
 import com.gt.gtapp.utils.Logger;
+import com.gt.gtapp.utils.commonutil.ActivityUtils;
+import com.gt.gtapp.utils.commonutil.AppManager;
+import com.gt.gtapp.utils.commonutil.LogUtils;
 import com.orhanobut.hawk.Hawk;
 import com.tencent.smtt.sdk.QbSdk;
 
@@ -19,6 +24,7 @@ public class MyApplication extends Application {
 
     private static boolean isNeedUpdate=true;
     private static Activity currentActivity;
+
 
     private static int accountType;
 
@@ -113,8 +119,15 @@ public class MyApplication extends Application {
             }
         });
     }
+    public static TextView getToolBarTextView(){
+        return  ((BaseActivity) (MyApplication.getCurrentActivity())).toolBarTitle;
+    }
+    public static RelativeLayout getToolBar(){
+        LogUtils.d("ActivityUtils.getTopActivity(appContext)="+ActivityUtils.getTopActivity());
+        return  ((BaseActivity) (MyApplication.getCurrentActivity())).mToolbar;
+    }
     public static Activity getCurrentActivity(){
-        return currentActivity;
+        return ActivityUtils.getTopActivity();
     }
 
     public static int getAccountType() {
@@ -139,4 +152,5 @@ public class MyApplication extends Application {
     public static void setNeedUpdate(boolean needUpdate) {
         isNeedUpdate = needUpdate;
     }
+
 }

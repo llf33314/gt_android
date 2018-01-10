@@ -15,18 +15,20 @@
         android:textColor="@color/black"
         android:textSize="18sp"
         android:visibility="gone" />
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/backLayout"
+        android:background="@drawable/btn_gray_transparency_null"
+        android:layout_width="@dimen/dp_48"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/toolbar_back"
+            android:layout_width="@dimen/dp_17"
+            android:layout_height="@dimen/dp_19"
+            android:layout_centerInParent="true"
+            android:background="@drawable/back" />
+    </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/toolbar_back"
-        android:layout_width="@dimen/dp_50"
-        android:layout_height="match_parent"
-        android:background="@drawable/btn_gray_null"
-        android:paddingBottom="@dimen/dp_10"
-        android:paddingLeft="@dimen/dp_10"
-        android:paddingRight="@dimen/dp_10"
-        android:paddingTop="@dimen/dp_10"
-        android:src="@drawable/back"
-        android:visibility="gone" />
     <RelativeLayout
         android:id="@+id/settingLayout"
         android:background="@drawable/btn_gray_transparency_null"
@@ -41,7 +43,7 @@
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/messageLayout"
-        android:layout_width="@dimen/dp_52"
+        android:layout_width="@dimen/dp_42"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:background="@drawable/btn_gray_transparency_null">
@@ -52,5 +54,19 @@
             android:layout_height="@dimen/dp_17"
             android:layout_centerInParent="true"
             android:background="@drawable/main_top_message" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:visibility="gone"
+        android:layout_toLeftOf="@id/messageLayout"
+        android:id="@+id/changeLayout"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="match_parent"
+        android:background="@drawable/btn_gray_transparency_null">
+        <ImageView
+            android:id="@+id/toolbar_change"
+            android:layout_width="@dimen/dp_18"
+            android:layout_height="@dimen/dp_17"
+            android:layout_centerInParent="true"
+            android:background="@drawable/erp_select" />
     </RelativeLayout>
 </RelativeLayout>

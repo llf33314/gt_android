@@ -12,13 +12,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gt.gtapp.R;
+import com.gt.gtapp.base.MyApplication;
+import com.gt.gtapp.bean.ClearCacheBean;
+import com.gt.gtapp.bean.LoginFinishMsg;
+import com.gt.gtapp.http.rxjava.RxBus;
+import com.gt.gtapp.http.rxjava.observable.SchedulerTransformer;
+import com.gt.gtapp.utils.commonutil.LogUtils;
 import com.gt.gtapp.web.GtBridge;
 import com.orhanobut.hawk.Hawk;
 import com.tencent.smtt.export.external.interfaces.JsResult;
 import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
 import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebChromeClient;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
@@ -29,6 +38,8 @@ import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by wzb on 2017/12/6 0006.
@@ -44,7 +55,7 @@ public class DuofriendFragment extends Fragment {
     String url;
 
     public DuofriendFragment(String url) {
-        this.url=url;
+        this.url = url;
     }
 
     @Nullable
@@ -56,10 +67,11 @@ public class DuofriendFragment extends Fragment {
         return v;
     }
 
-    private void initWebview(){
-        //webView.loadUrl("http://192.168.3.32:8085");
+    private void initWebview() {
+        //webView.loadUrl("http://192.168.3.32:8888/#");
+
         webView.loadUrl(url);
-        gtBridge=new GtBridge();
+        gtBridge = new GtBridge();
         webView.addJavascriptInterface(gtBridge, "AndroidAppJs");//添加js监听 这样html就能调用客户端
 
         webView.setWebChromeClient(webChromeClient);
@@ -85,6 +97,7 @@ public class DuofriendFragment extends Fragment {
                 .getPath());
         // webSetting.setPageCacheCapacity(IX5WebSettings.DEFAULT_CACHE_CAPACITY);
         webSetting.setPluginState(WebSettings.PluginState.ON_DEMAND);
+        registerClearCache();
     }
 
 
@@ -140,53 +153,155 @@ public class DuofriendFragment extends Fragment {
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             if (Build.VERSION.SDK_INT >= 21) {
                 String url = request.getUrl().toString();
-                Log.d("web", " shouldInterceptRequest url=" + url);
-
+                Log.d("web", " shouldInterceptRequest url=" + url + "  ----home=" + Hawk.get("homeURL", ""));
                 if (!TextUtils.isEmpty(url) && url.contains("jquery.js")) {
                     return editResponse();
                 }
+
             }
             return super.shouldInterceptRequest(view, request);
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-           // startTime = System.currentTimeMillis();
+            // startTime = System.currentTimeMillis();
+            if (url.toString().equals(Hawk.get("homeURL", ""))) {
+                LogUtils.d("setRedToolbar");
+                ((MainActivity) getActivity()).setH5Title("");
+                ((MainActivity) getActivity()).showBottom(true);
+                ((MainActivity) getActivity()).setRedToolbar();
+                MyApplication.showHeader(true);
+
+            }
             super.onPageStarted(view, url, favicon);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             //loadTime.setText("加载时间：" + (System.currentTimeMillis() - startTime) + " ms");
+            //showHeader();
+            //showBottom();
+            //showTitle(MyApplication.getToolBarTextView());
             super.onPageFinished(view, url);
         }
     };
 
-    public boolean onBackKeyDown() {
-            if (webView != null && webView.canGoBack()) {
-                webView.goBack();
-                return true;
-            } else{
-                return false;
-            }
+    @Override
+    public void onResume() {
+        // showHeader();
+        // showBottom();
+        super.onResume();
     }
-    public void reLoad(){
+
+    public boolean onBackKeyDown() {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void reLoad() {
         webView.reload();
     }
-    public void goToHomeUrl(){
-        String homeURL= Hawk.get("homeURL","");
-        if (!TextUtils.isEmpty(homeURL)){
-            Log.d("goToHomeUrl","goToHomeUrl="+homeURL);
+
+    public void goToHomeUrl() {
+        String homeURL = Hawk.get("homeURL", "");
+        if (!TextUtils.isEmpty(homeURL)) {
+            Log.d("goToHomeUrl", "goToHomeUrl=" + homeURL);
             webView.loadUrl(homeURL);
             gtBridge.showBottom(true);
             gtBridge.showHeader(true);
             //webView.reload();
         }
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
     }
 
+    public void registerClearCache() {
+        RxBus.get().toObservable(ClearCacheBean.class)
+                .compose(SchedulerTransformer.<ClearCacheBean>transformer())
+                .subscribe(new Consumer<ClearCacheBean>() {
+                    @Override
+                    public void accept(@NonNull ClearCacheBean clearCacheBean) throws Exception {
+                        if (webView != null) {
+                            webView.clearCache(true);
+                            webView.clearFormData();
+                            getActivity().getCacheDir().delete();
+                            webView.loadUrl("javascript: localStorage.clear()");
+                            LogUtils.d("clear cache");
+                        }
+                    }
+                });
+
+    }
+
+    private String result = "";
+
+    /**
+     * js回调
+     *
+     * @param jsFn
+     */
+    public String webLoadJS(final String jsFn) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringBuilder stringBuilder = new StringBuilder("javascript:");
+                stringBuilder.append("WebMethod.");
+                stringBuilder.append(jsFn);
+                stringBuilder.append("(");
+                stringBuilder.append(")");
+                Log.i("demo", "stringBuilder=" + stringBuilder.toString());
+                webView.loadUrl(stringBuilder.toString());
+                webView.evaluateJavascript(stringBuilder.toString(), new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        result = value;
+                    }
+                });
+            }
+        });
+        return result;
+    }
+
+    private void showHeader() {
+        String isShow = webLoadJS("isHeader");
+        LogUtils.d("showHeader isShow=" + isShow);
+        if (isShow.equals("true")) {
+            gtBridge.showHeader(true);
+        } else if (isShow.equals("false")) {
+            gtBridge.showHeader(false);
+        }
+    }
+
+    public void showTitle(TextView textView) {
+        String title = "";
+        LogUtils.d("showTitle title=" + title);
+
+        if (title == null || title.equals("null")) {
+            title = "";
+        }
+        if (textView != null) {
+            textView.setText(title);
+        }
+    }
+
+    private void showBottom() {
+        String isShow = webLoadJS("isShowBottom");
+        if (TextUtils.isEmpty(isShow)) {
+            isShow = "true";
+        }
+        LogUtils.d("showBottom isShow=" + isShow);
+        if (isShow.equals("true")) {
+            gtBridge.showBottom(true);
+        } else if (isShow.equals("false")) {
+            gtBridge.showBottom(false);
+        }
+    }
 }

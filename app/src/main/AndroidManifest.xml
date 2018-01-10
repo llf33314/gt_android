@@ -35,6 +35,7 @@
         </activity>
         <activity android:name=".login.StaffListIndustryActivity"
             android:label="选择行业"
+            android:launchMode="singleTask"
             >
 
         </activity>

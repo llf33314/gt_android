@@ -15,9 +15,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.gt.gtapp.R;
+import com.gt.gtapp.utils.commonutil.AppManager;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
 import com.gt.gtapp.utils.statusbar.StatusBarFontHelper;
 import com.gt.gtapp.utils.commonutil.BarUtils;
+import com.gt.gtapp.web.GtBridge;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import butterknife.ButterKnife;
@@ -27,11 +29,16 @@ import butterknife.ButterKnife;
  */
 
 public abstract class BaseActivity extends RxAppCompatActivity {
-    private RelativeLayout mToolbar;
-    private TextView toolBarTitle;
+    public RelativeLayout mToolbar;
+    public RelativeLayout mainToolbar;
+    public TextView toolBarTitle;
     private ImageView toolBarBack;
+    private RelativeLayout backLayout;
     private RelativeLayout messageLayout;
     private RelativeLayout settingLayout;
+    private RelativeLayout changeErpLayout;
+    private GtBridge gtBridge;
+
     private View activityView;
     private BtnClickListener mBtnClickListener=new BtnClickListener();
     /**
@@ -59,13 +66,15 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     }
 
     private void init() {
+        AppManager.getInstance().addActivity(this);
         mToolbar = (RelativeLayout) findViewById(R.id.base_toolbar);
         //减去状态栏高度
         toolBarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolBarBack = (ImageView) findViewById(R.id.toolbar_back);
         messageLayout = (RelativeLayout) findViewById(R.id.messageLayout);
         settingLayout = (RelativeLayout) findViewById(R.id.settingLayout);
-
+        changeErpLayout = (RelativeLayout) findViewById(R.id.changeLayout);
+        backLayout = (RelativeLayout) findViewById(R.id.backLayout);
         switch (getToolBarType()) {
             case TOOLBAR_NOT:
                 mToolbar.setVisibility(View.GONE);
@@ -85,9 +94,11 @@ public abstract class BaseActivity extends RxAppCompatActivity {
 
         //mToolbar.setPadding(0, BarUtils.getStatusBarHeight(this),0,0);
 
-        toolBarBack.setOnClickListener(mBtnClickListener);
+        backLayout.setOnClickListener(mBtnClickListener);
         messageLayout.setOnClickListener(mBtnClickListener);
         settingLayout.setOnClickListener(mBtnClickListener);
+        changeErpLayout.setOnClickListener(mBtnClickListener);
+        gtBridge=new GtBridge();
     }
 
     public void visibilityBack() {
@@ -117,7 +128,8 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     }
 
     public void setToolBarTitle(String title) {
-        toolBarTitle.setVisibility(View.GONE);
+        toolBarTitle.setVisibility(View.VISIBLE);
+        toolBarTitle.setTextColor(getResources().getColor(R.color.white));
         toolBarTitle.setText(title);
     }
 
@@ -138,7 +150,8 @@ public abstract class BaseActivity extends RxAppCompatActivity {
       //  toolMessage.setVisibility(View.GONE);
         toolBarTitle.setVisibility(View.VISIBLE);
         toolBarTitle.setText(title);
-        toolBarBack.setVisibility(View.VISIBLE);
+        backLayout.setVisibility(View.VISIBLE);
+        settingLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -196,7 +209,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     public void goneToolBar() {
         Log.d("goneToolBar","goneToolBar");
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) activityView.getLayoutParams();
-        lp.setMargins(0, BarUtils.getStatusBarHeight(this), 0, 0);
+        lp.setMargins(0,BarUtils.getStatusBarHeight(getApplicationContext()), 0, 0);
         activityView.setLayoutParams(lp);
         mToolbar.setVisibility(View.GONE);
         BarUtils.setStatusBarColor(this,getResources().getColor(R.color.launch_gray));
@@ -221,7 +234,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()){
 
-                case R.id.toolbar_back:
+                case R.id.backLayout:
                     onBackPressed();
                     break;
                 case R.id.messageLayout:
@@ -229,6 +242,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
                     break;
                 case R.id.settingLayout:
                     ToastUtil.getInstance().showToast("更多功能敬请期待");
+                    break;
+                case R.id.changeLayout:
+                    gtBridge.switchIndustry();
                     break;
                 default:
                     break;

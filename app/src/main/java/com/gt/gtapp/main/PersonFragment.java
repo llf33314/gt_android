@@ -15,10 +15,12 @@ import com.gt.gtapp.R;
 import com.gt.gtapp.base.BaseActivity;
 import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.BossAccountBean;
+import com.gt.gtapp.bean.ClearCacheBean;
 import com.gt.gtapp.bean.HttpCodeMsgBean;
 import com.gt.gtapp.bean.StaffAccountBean;
 import com.gt.gtapp.http.HttpResponseException;
 import com.gt.gtapp.http.retrofit.HttpCall;
+import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.http.rxjava.observable.DialogTransformer;
 import com.gt.gtapp.http.rxjava.observable.ResultTransformer;
 import com.gt.gtapp.http.rxjava.observable.SchedulerTransformer;
@@ -130,7 +132,7 @@ public class PersonFragment extends Fragment {
                                         intent.putExtra("anim_start_time",1);
                                         getActivity().startActivity(intent);
                                         getActivity().finish();
-
+                                        RxBus.get().post(new ClearCacheBean());
                                     }else{
                                         ToastUtil.getInstance().showToast(httpCodeMsgBean.getMsg());
                                     }

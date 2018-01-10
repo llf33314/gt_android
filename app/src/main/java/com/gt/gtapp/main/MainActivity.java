@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,10 +18,9 @@ import com.gt.gtapp.base.MyApplication;
 import com.gt.gtapp.bean.LoginFinishMsg;
 import com.gt.gtapp.http.rxjava.RxBus;
 import com.gt.gtapp.update.UpdateManager;
-import com.gt.gtapp.utils.commonutil.BarUtils;
+import com.gt.gtapp.utils.commonutil.LogUtils;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
 import com.gt.gtapp.web.GtBridge;
-import com.orhanobut.hawk.Hawk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +51,8 @@ public class MainActivity extends BaseActivity {
     private DuofriendFragment duofriendFragment;
     private PersonFragment personFragment;
     GtBridge gtBridge;
+
+    private String h5Title = "";
     /**
      * 方便操作
      */
@@ -71,7 +73,7 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         init();
         if (MyApplication.isNeedUpdate()) {
-            UpdateManager updateManager = new UpdateManager(this,  BaseConstant.UPDATE_NAME, UpdateManager.UPDATE_BADGE_AND_DIALOG);
+            UpdateManager updateManager = new UpdateManager(this, BaseConstant.UPDATE_NAME, UpdateManager.UPDATE_BADGE_AND_DIALOG);
             updateManager.requestUpdate();
         }
     }
@@ -122,9 +124,13 @@ public class MainActivity extends BaseActivity {
 
                     mFragmentTransaction.commit();
                     currentFragment = 0;
-                    changeStyle(TOOLBAR_RED_STYLE);
-                    boolean isLeftHeaderShow = Hawk.get(BaseConstant.HAWK_LEFT_IS_SHOW_HEADER, true);
-
+                    if (MyApplication.getToolBarTextView() != null && MyApplication.getToolBar() != null
+                            &&!TextUtils.isEmpty(h5Title)) {
+                        LogUtils.d("h5Title=" + h5Title);
+                        setWhiteToolbar();
+                    } else {
+                        setRedToolbar();
+                    }
                 }
 
                 break;
@@ -142,7 +148,11 @@ public class MainActivity extends BaseActivity {
 
                     mFragmentTransaction.commit();
                     currentFragment = 1;
-                    changeStyle(TOOLBAR_RED_WHITE_TITLE_STYLE, "个人中心");
+                    if (MyApplication.getToolBarTextView() != null) {
+                        setRedToolbar();
+                        MyApplication.getToolBarTextView().setVisibility(View.VISIBLE);
+                        MyApplication.getToolBarTextView().setText("个人中心");
+                    }
                 }
                 break;
 
@@ -177,5 +187,43 @@ public class MainActivity extends BaseActivity {
 
     public DuofriendFragment getDuoFriendFragment() {
         return duofriendFragment;
+    }
+
+    public String getH5Title() {
+        return h5Title;
+    }
+
+    public void setH5Title(String h5Title) {
+        this.h5Title = h5Title;
+        setWhiteToolbar();
+    }
+
+    public void setRedToolbar() {
+        LogUtils.d("setRedToolbar inside");
+        MyApplication.getToolBarTextView().setTextColor(0xffffffff);
+        MyApplication.getToolBarTextView().setText("");
+        MyApplication.getToolBar().setBackgroundResource(R.drawable.shape_toolbar_shade);
+        if (MyApplication.getToolBar().findViewById(R.id.changeLayout) != null) {
+            MyApplication.getToolBar().findViewById(R.id.changeLayout).setVisibility(View.GONE);
+        }
+        if (MyApplication.getToolBar().findViewById(R.id.toolbar_message) != null) {
+            MyApplication.getToolBar().findViewById(R.id.toolbar_message).setBackgroundResource(R.drawable.main_top_message);
+        }
+    }
+
+    public void setWhiteToolbar() {
+        LogUtils.d("setWhiteToolbar inside");
+
+        if (!TextUtils.isEmpty(h5Title)&& !h5Title.equals("null")) {
+            MyApplication.getToolBarTextView().setText(h5Title);
+            MyApplication.getToolBar().setBackgroundColor(0xffffffff);
+            MyApplication.getToolBarTextView().setTextColor(0xff000000);
+            if (MyApplication.getToolBar().findViewById(R.id.changeLayout) != null) {
+                MyApplication.getToolBar().findViewById(R.id.changeLayout).setVisibility(View.VISIBLE);
+            }
+            if (MyApplication.getToolBar().findViewById(R.id.toolbar_message) != null) {
+                MyApplication.getToolBar().findViewById(R.id.toolbar_message).setBackgroundResource(R.drawable.message_bg_white);
+            }
+        }
     }
 }

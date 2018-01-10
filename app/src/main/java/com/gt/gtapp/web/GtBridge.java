@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.widget.Toast;
 
 import com.gt.gtapp.base.BaseActivity;
@@ -39,6 +40,7 @@ import com.gt.gtapp.utils.commonutil.AppManager;
 import com.gt.gtapp.utils.commonutil.AppUtils;
 import com.gt.gtapp.utils.commonutil.ClipboardUtils;
 import com.gt.gtapp.utils.commonutil.IntentUtils;
+import com.gt.gtapp.utils.commonutil.LogUtils;
 import com.gt.gtapp.utils.commonutil.NetworkUtils;
 import com.gt.gtapp.utils.commonutil.StringUtils;
 import com.gt.gtapp.utils.commonutil.ToastUtil;
@@ -63,6 +65,21 @@ public class GtBridge {
         if (duofriendFragment!=null){
             duofriendFragment.goToHomeUrl();
         }
+    }
+
+    @JavascriptInterface
+    public void setToolbarText(final String str) {
+        LogUtils.d("setToolbarText str="+str);
+        ((MainActivity) (MyApplication.getCurrentActivity())). runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (!TextUtils.isEmpty(str)&&!str.equals("null")) {
+                    ((MainActivity) (MyApplication.getCurrentActivity())).setToolBarTitle(str);
+                    ((MainActivity) (MyApplication.getCurrentActivity())).setH5Title(str);
+                }
+            }
+        });
+
     }
     /**
      * 是否显示消息列表
@@ -93,8 +110,6 @@ public class GtBridge {
      */
     @JavascriptInterface
     public void showHeader(final boolean isShow) {
-        Log.d("showHeader","showHeader="+isShow);
-        Hawk.put(BaseConstant.HAWK_LEFT_IS_SHOW_HEADER,isShow);
         MyApplication.showHeader(isShow);
     }
     /**
@@ -482,4 +497,5 @@ public class GtBridge {
         ToastUtil.getInstance().showToast(fromJsString);
         return "from android";
     }
+
 }
